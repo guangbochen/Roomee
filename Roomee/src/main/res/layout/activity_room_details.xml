@@ -1,16 +1,157 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context=".RoomDetails">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="room_details" />
+    <!--this linearLayout contains header info-->
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="10"
+        android:background="@color/header_green">
 
-</RelativeLayout>
+        <ImageButton
+            android:id="@+id/imgSearch"
+            android:layout_weight="5"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:src="@drawable/ic_action_search"
+            android:background="@null" />
+
+        <TextView
+            android:id="@+id/txtCurrentTime"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:textColor="@color/white"
+            android:textSize="20dp"
+            android:gravity="center"
+            android:layout_weight="1"
+            android:text="1:48 pm"/>
+
+        <ImageButton
+            android:id="@+id/imgAdd"
+            android:layout_weight="5"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:src="@drawable/ic_action_new"
+            android:background="@null" />
+    </LinearLayout>
+
+    <!--this linearLayout contains the room details-->
+    <LinearLayout
+        android:id="@+id/roomInfo"
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="20"
+        android:orientation="vertical"
+        android:background="@color/room_green">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_weight="50"
+            android:layout_height="0dip"
+            android:textColor="@color/white"
+            android:textSize="22dp"
+            android:gravity="center"
+            android:text="North Meeting Room"/>
+
+        <ImageButton
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:id="@+id/imgAdd"
+            android:layout_weight="50"
+            android:layout_height="0dip"
+            android:src="@drawable/ic_action_refresh"
+            android:background="@null" />
+    </LinearLayout>
+
+    <!--this linearLayout contains the time details-->
+    <LinearLayout
+        android:id="@+id/timeInfo"
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="70"
+        android:orientation="vertical"
+        android:textColor="@color/white"
+        android:background="@color/time_green">
+
+        <TextView
+            android:id="@+id/txtStatus"
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:paddingTop="10dp"
+            android:layout_weight="10"
+            android:textColor="@color/white"
+            android:gravity="center"
+            android:text="Free for"/>
+
+        <!--this textView shows room free or busy time-->
+        <TextView
+            android:id="@+id/txtTime"
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:layout_weight="35"
+            android:textColor="@color/white"
+            android:textSize="60dp"
+            android:gravity="center"
+            android:text="45 minutes"/>
+
+        <!--this linearLayout contians button for managing meeting actions-->
+        <LinearLayout
+            android:id="@+id/meetingFunctions"
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:orientation="horizontal"
+            android:layout_weight="15">
+
+            <TextView
+                android:layout_height="match_parent"
+                android:layout_width="0dip"
+                android:layout_weight="2" />
+
+            <Button
+                android:id="@+id/btnEndMeeting"
+                android:layout_width="0dip"
+                android:layout_height="match_parent"
+                android:background="@drawable/action_button"
+                android:text="End"
+                android:textColor="@color/white"
+                android:textSize="20dp"
+                android:layout_weight="1"
+                android:drawableLeft="@drawable/ic_action_end"
+                android:paddingLeft="15dp" />
+
+            <Button
+                android:id="@+id/btnExtendMeeting"
+                android:layout_width="0dip"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="40dp"
+                android:background="@drawable/action_button"
+                android:textColor="@color/white"
+                android:textSize="20dp"
+                android:text="Extend"
+                android:layout_weight="1"
+                android:drawableLeft="@drawable/ic_action_expand"
+                android:paddingLeft="15dp" />
+
+            <TextView
+                android:layout_height="match_parent"
+                android:layout_width="0dip"
+                android:layout_weight="2" />
+
+        </LinearLayout>
+
+        <!--table layout contains the time frame-->
+        <TableLayout
+            android:id="@+id/txtStatus"
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:layout_weight="40">
+        </TableLayout>
+
+
+
+    </LinearLayout>
+
+</LinearLayout>

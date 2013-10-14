@@ -18,8 +18,10 @@ import java.util.List;
  * Created by guangbo on 10/10/13.
  */
 public class RoomListAdapter extends BaseAdapter {
-    Context context;
-    List<Room> roomList;
+
+    private Context context;
+    private List<Room> roomList;
+    private Integer imageCheckButton = new Integer(R.drawable.check);
 
     public RoomListAdapter(Context context, List<Room> roomList) {
         this.context = context;
@@ -37,14 +39,11 @@ public class RoomListAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View view, ViewGroup parent) {
         ViewHolder holder = null;
-        Room room = (Room) getItem(position);
         LayoutInflater mInflater = (LayoutInflater)context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         if(view == null)
         {
             view = mInflater.inflate(R.layout.room_list_item , null);
             holder  = new ViewHolder();
-            if(room.getStatus() == 1)
-                holder.txtTime.setTextColor(Color.GREEN);
             holder.imageStatus = (ImageView) view.findViewById(R.id.imageStatus);
             holder.txtRoom = (TextView) view.findViewById(R.id.txtRoom);
             holder.txtStatus = (TextView) view.findViewById(R.id.txtStatus);
@@ -57,25 +56,33 @@ public class RoomListAdapter extends BaseAdapter {
             holder = (ViewHolder) view.getTag();
         }
 
+        Room room = (Room) getItem(position);
+        setHolderDetails(holder, room);
+
+        return view;
+    }
+
+    private void setHolderDetails(ViewHolder holder, Room room)
+    {
         //check room status
         String roomStatus;
         if(room.getStatus() == 0)
         {
             roomStatus = " Free for ";
             holder.txtTime.setTextColor(Color.GREEN);
+            holder.imageStatus.setImageResource(R.drawable.free);
         }
         else
         {
             roomStatus = " Busy for ";
+            holder.txtTime.setTextColor(Color.RED);
+            holder.imageStatus.setImageResource(R.drawable.busy);
         }
 
-        holder.imageStatus.setImageResource(room.getStatus());
         holder.txtRoom.setText(room.getName());
         holder.txtStatus.setText(roomStatus);
         holder.txtTime.setText(room.getTime());
-        holder.imageCheck.setImageResource(room.getCheckDetails());
-
-        return view;
+        holder.imageCheck.setImageResource(imageCheckButton);
     }
 
     @Override
@@ -90,7 +97,7 @@ public class RoomListAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int position) {
-        return roomList.indexOf(getItemId(position));
+        return roomList.indexOf(getItem(position));
     }
 
 }

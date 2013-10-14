@@ -23,19 +23,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingLeft="10dp"
+        android:paddingTop="10dp"
         android:paddingBottom="10dp"
         android:textColor="#000000"
-        android:textSize="20sp" />
+        android:textStyle="bold"
+        android:textSize="22sp" />
 
     <TextView
         android:id="@+id/txtStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/txtRoom"
-        android:paddingTop="10dp"
+        android:paddingTop="5dp"
         android:paddingLeft="10px"
         android:textColor="#4D5052"
-        android:textSize="16sp" />
+        android:textSize="20sp" />
 
     <TextView
         android:id="@+id/txtTime"
@@ -43,18 +45,17 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/txtRoom"
         android:layout_toRightOf="@+id/txtStatus"
-        android:paddingTop="10dp"
-        android:paddingLeft="10dp"
-        android:textColor="#EB453E"
-        android:textSize="16sp" />
+        android:paddingTop="5dp"
+        android:paddingLeft="5dp"
+        android:textSize="20sp" />
     </RelativeLayout>
 
     <ImageView
         android:id="@+id/imageCheck"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="65dp"
+        android:layout_height="65dp"
         android:layout_marginLeft="10dp"
         android:layout_marginTop="10dp"
         android:layout_weight="0.5"
-        android:contentDescription="status_icon" />
+        android:contentDescription="checkDetails" />
 </LinearLayout>

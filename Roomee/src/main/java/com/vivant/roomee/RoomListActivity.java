@@ -1,5 +1,6 @@
 package com.vivant.roomee;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
@@ -19,13 +20,11 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
             "Black Mesa", "The Green Room",
             "Gondwana 2" , "Hall of Justice 2",
             "Black Mesa 2", "The Green Room 2"};
-    private static final Integer[] status = new Integer[] { R.drawable.free, R.drawable.busy, R.drawable.free, R.drawable.busy,
-            R.drawable.free, R.drawable.free, R.drawable.free, R.drawable.busy};
+    private static final int[] status = new int[] { 1, 0 ,1, 0, 1, 1, 0, 0};
     private static final String[] time = new String [] { "45 minutes" , "1 hour",
             "45 minutes", "1 hour and 40 minutes",
             "45 minutes" , "1 hour",
             "45 minutes", "1 hour and 40 minutes"};
-    private Integer imageCheckButton = new Integer(R.drawable.check);
 
     private ListView roomListView;
     private List<Room> roomList;
@@ -38,13 +37,13 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
         roomList = new ArrayList<Room>();
         for(int i=0; i < id.length; i++)
         {
-            Room room = new Room(id[i], name[i], status[i], time[i], imageCheckButton);
+            Room room = new Room(id[i], name[i], status[i], time[i]);
             roomList.add(room);
         }
         roomListView = (ListView) findViewById(R.id.roomListView);
         RoomListAdapter adapter = new RoomListAdapter(this,roomList);
         roomListView.setAdapter(adapter);
-//        roomList.setOnItemClickListener(this);
+        roomListView.setOnItemClickListener(this);
     }
 
 
@@ -56,6 +55,10 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
     }
 
     @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Intent intent = new Intent(RoomListActivity.this,RoomDetails.class);
+        intent.putExtra("status", status[position]);
+        startActivity(intent);
+
     }
 }

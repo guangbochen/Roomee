@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="10"
-        android:background="@color/header_green">
+        android:background="@color/header_red">
 
         <ImageButton
             android:id="@+id/imgSearch"
@@ -45,7 +45,7 @@
         android:layout_height="0dip"
         android:layout_weight="20"
         android:orientation="vertical"
-        android:background="@color/room_green">
+        android:background="@color/room_red">
 
         <TextView
             android:layout_width="match_parent"
@@ -74,7 +74,7 @@
         android:layout_weight="70"
         android:orientation="vertical"
         android:textColor="@color/white"
-        android:background="@color/time_green">
+        android:background="@color/time_red">
 
         <TextView
             android:id="@+id/txtStatus"
@@ -100,15 +100,11 @@
         <!--this linearLayout contians button for managing meeting actions-->
         <LinearLayout
             android:id="@+id/meetingFunctions"
-            android:layout_width="match_parent"
+            android:layout_width="300dp"
             android:layout_height="0dip"
             android:orientation="horizontal"
+            android:layout_gravity="center"
             android:layout_weight="15">
-
-            <TextView
-                android:layout_height="match_parent"
-                android:layout_width="0dip"
-                android:layout_weight="2" />
 
             <Button
                 android:id="@+id/btnEndMeeting"
@@ -134,11 +130,6 @@
                 android:layout_weight="1"
                 android:drawableLeft="@drawable/ic_action_expand"
                 android:paddingLeft="15dp" />
-
-            <TextView
-                android:layout_height="match_parent"
-                android:layout_width="0dip"
-                android:layout_weight="2" />
 
         </LinearLayout>
 

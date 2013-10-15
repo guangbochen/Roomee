@@ -1,13 +1,10 @@
 package com.vivant.roomee;
 
-import android.annotation.TargetApi;
-import android.os.Build;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -44,15 +41,20 @@ public class RoomDetails extends Activity {
     }
 
     private void displayItems(Bundle extras) {
+
         //get layout component
         headerLinerLayout = (LinearLayout) findViewById(R.id.header);
         roomInfoLinerLayout = (LinearLayout) findViewById(R.id.roomInfo);
         timeInfoLinerLayout = (LinearLayout) findViewById(R.id.timeInfo);
 
-        //get each view component
-        txtStatus = (TextView) findViewById(R.id.txtStatus);
+        //header view components
         imageSearch = (ImageView) findViewById(R.id.imgSearch);
         imageAdd = (ImageView) findViewById(R.id.imgAdd);
+
+        // view components for room details
+
+        // view components for time details
+        txtStatus = (TextView) findViewById(R.id.txtStatus);
         btnEndMeeting = (Button) findViewById(R.id.btnEndMeeting);
         btnExtendMeeting = (Button) findViewById(R.id.btnExtendMeeting);
 
@@ -73,6 +75,9 @@ public class RoomDetails extends Activity {
             }
             else {
                 //if room status is free
+                headerLinerLayout.setBackgroundColor(getResources().getColor(R.color.header_green));
+                roomInfoLinerLayout.setBackgroundColor(getResources().getColor(R.color.room_green));
+                timeInfoLinerLayout.setBackgroundColor(getResources().getColor(R.color.time_green));
                 btnExtendMeeting.setVisibility(View.INVISIBLE);
                 btnEndMeeting.setVisibility(View.INVISIBLE);
             }

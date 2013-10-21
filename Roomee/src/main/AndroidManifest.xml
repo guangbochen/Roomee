@@ -8,6 +8,8 @@
         android:minSdkVersion="7"
         android:targetSdkVersion="17" />
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -23,13 +25,15 @@
         </activity>
         <activity
             android:name="com.vivant.roomee.RoomListActivity"
+            android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_room_list" >
         </activity>
 
         <!--defines roomDetails activity to take fullscreen-->
         <activity
-            android:name="com.vivant.roomee.RoomDetails"
+            android:name=".RoomDetailsActivity"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_room_details" >
         </activity>
     </application>

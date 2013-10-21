@@ -9,7 +9,11 @@ import android.widget.Button;
 
 public class MainActivity extends Activity {
 
-    @Override
+    private static final String status = "status";
+    private static final String data = "status";
+    private static final String oauth = "oauth_token";
+    private static final String message = "message";
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -18,6 +22,7 @@ public class MainActivity extends Activity {
 
     public void viewButtonOnClick(View view) {
         Intent intent = new Intent(getApplicationContext(), RoomListActivity.class);
+        intent.putExtra("token", "e24cda222194876faaba860416f6ef126d328639");
         startActivity(intent);
 
     }

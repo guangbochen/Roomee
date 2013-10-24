@@ -76,7 +76,7 @@
             android:id="@+id/txtStatus"
             android:layout_width="match_parent"
             android:layout_height="0dip"
-            android:paddingTop="5dp"
+            android:layout_margin="5dp"
             android:layout_weight="10"
             android:textColor="@color/white"
             android:gravity="center" />
@@ -130,13 +130,28 @@
 
         <!--table layout contains the time frame-->
         <TableLayout
-            android:id="@+id/txtStatus"
+            android:id="@+id/meetingTableHeader"
             android:layout_width="match_parent"
             android:layout_height="0dip"
-            android:layout_weight="40">
+            android:orientation="vertical"
+            android:stretchColumns="*"
+            android:layout_margin="10dp"
+            android:paddingLeft="10dp"
+            android:layout_weight="5">
         </TableLayout>
 
+        <TableLayout
+            android:id="@+id/meetingTableTime"
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:orientation="vertical"
+            android:stretchColumns="*"
+            android:paddingLeft="10dp"
+            android:layout_margin="10dp"
+            android:layout_weight="40">
 
+
+        </TableLayout>
 
     </LinearLayout>
 

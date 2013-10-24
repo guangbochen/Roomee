@@ -5,14 +5,18 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TableLayout;
 import android.widget.TextView;
+
+import com.vivant.roomee.adapter.MeetingTableHandler;
 import com.vivant.roomee.json.JSONParser;
+import com.vivant.roomee.json.JSONParserImpl;
+import com.vivant.roomee.model.Constants;
 import com.vivant.roomee.model.Meeting;
 import com.vivant.roomee.model.Room;
 import org.json.JSONArray;
@@ -25,25 +29,14 @@ import java.util.List;
 
 public class RoomDetailsActivity extends Activity {
 
-    //JSON Node names;
-    private final static String TAG_STATUS = "status";
-    private final static String TAG_MESSAGE = "message";
-    private final static String TAG_DATA = "data";
-    private final static String TAG_ROOM = "room";
-    private final static String TAG_ID = "id";
-    private final static String TAG_NAME = "name";
-    private final static String TAG_FREEBUSY = "freebusy";
-    private final static String TAG_MEETINGS = "meetings";
-    private final static String TAG_SUMMARY = "summary";
-    private final static String TAG_CREATOR = "creator";
-    private final static String TAG_START = "start";
-    private final static String TAG_END = "end";
-    private final static String TAG_TIME = "time";
     private static String roomId;
     private static String token;
     private Room room;
     private List<Meeting> meetingList = new ArrayList<Meeting>();
+    private JSONParser jsonParser;
+    private MeetingTableHandler meetingTableHandler;
 
+    //view components
     private ImageView imageSearch;
     private ImageView imageAdd;
     private LinearLayout headerLinerLayout;
@@ -54,6 +47,8 @@ public class RoomDetailsActivity extends Activity {
     private TextView txtTime;
     private Button btnEndMeeting;
     private Button btnExtendMeeting;
+    private TableLayout meetingTableHeader;
+    private TableLayout meetingTableTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,12 +65,19 @@ public class RoomDetailsActivity extends Activity {
             new ProgressTask(RoomDetailsActivity.this).execute();
         }
 
-
         //get the current time and updates in every sec.
         Thread timeThread = null;
         Runnable myRunnableThread = new CountDownRunner();
         timeThread= new Thread(myRunnableThread);
         timeThread.start();
+
+        //displays time table
+        meetingTableHeader = (TableLayout) findViewById(R.id.meetingTableHeader);
+        meetingTableTime = (TableLayout) findViewById(R.id.meetingTableTime);
+        meetingTableHandler = new MeetingTableHandler(RoomDetailsActivity.this, meetingTableHeader,meetingTableTime);
+        meetingTableHandler.setMeetingTableHeader();
+        meetingTableHandler.setMeetingTableTimeZone();
+
     }
 
     private void displayItems() {
@@ -185,40 +187,41 @@ public class RoomDetailsActivity extends Activity {
 
         @Override
         protected Boolean doInBackground(String... strings) {
-
             //crate Json parser instance
-            JSONParser jsonParser = new JSONParser();
+            jsonParser = new JSONParserImpl();
 
             //getting json string from url
-//            String url = "rooms?oauth_token=" + extras.getString("token");
-            String url = "rooms/"+ roomId +"?oauth_token="+ token;
+//            String url = "rooms/"+ roomId +"?oauth_token="+ token;
+            String url = "http://www.json-generator.com/j/bUIYPQhxYO?indent=4";
             JSONObject json = jsonParser.getJSONFromUrl(url);
             try{
-
-                String HttpStatus = json.getString(TAG_STATUS);
-                if(HttpStatus.equals("success"))
+                if(json != null)
                 {
-                    JSONObject data = json.getJSONObject(TAG_DATA);
-
-                    //retrieves room data and saves into room object
-                    JSONObject jRoom = data.getJSONObject(TAG_ROOM);
-                    int id = Integer.parseInt(jRoom.getString(TAG_ID));
-                    String name = jRoom.getString(TAG_NAME);
-                    int freeBusy = Integer.parseInt(jRoom.getString(TAG_FREEBUSY));
-                    String time = jRoom.getString(TAG_TIME);
-                    room = new Room(id,name,freeBusy,time);
-
-                    //retrieves array of meetings and add to the list
-                    JSONArray meetings = jRoom.getJSONArray(TAG_MEETINGS);
-                    for(int i=0; i < meetings.length(); i++)
+                    String HttpStatus = json.getString(Constants.TAG_STATUS);
+                    if(HttpStatus.equals("success"))
                     {
-                        JSONObject jMeeting = meetings.getJSONObject(i);
-                        String summary = jMeeting.getString(TAG_SUMMARY);
-                        String creator = jMeeting.getString(TAG_CREATOR);
-                        String start = jMeeting.getString(TAG_START);
-                        String end = jMeeting.getString(TAG_END);
-                        Meeting meeting = new Meeting(summary, creator, start, end);
-                        meetingList.add(meeting);
+                        JSONObject data = json.getJSONObject(Constants.TAG_DATA);
+
+                        //retrieves room data and saves into room object
+                        JSONObject jRoom = data.getJSONObject(Constants.TAG_ROOM);
+                        int id = Integer.parseInt(jRoom.getString(Constants.TAG_ID));
+                        String name = jRoom.getString(Constants.TAG_NAME);
+                        int freeBusy = Integer.parseInt(jRoom.getString(Constants.TAG_FREEBUSY));
+                        String time = jRoom.getString(Constants.TAG_TIME);
+                        room = new Room(id,name,freeBusy,time);
+
+                        //retrieves array of meetings and add to the list
+                        JSONArray meetings = jRoom.getJSONArray(Constants.TAG_MEETINGS);
+                        for(int i=0; i < meetings.length(); i++)
+                        {
+                            JSONObject jMeeting = meetings.getJSONObject(i);
+                            String summary = jMeeting.getString(Constants.TAG_SUMMARY);
+                            String creator = jMeeting.getString(Constants.TAG_CREATOR);
+                            String start = jMeeting.getString(Constants.TAG_START);
+                            String end = jMeeting.getString(Constants.TAG_END);
+                            Meeting meeting = new Meeting(summary, creator, start, end);
+                            meetingList.add(meeting);
+                        }
                     }
                 }
             }

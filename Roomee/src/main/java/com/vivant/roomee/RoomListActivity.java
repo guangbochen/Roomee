@@ -6,33 +6,28 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.Toast;
 import com.vivant.roomee.adapter.RoomListAdapter;
 import com.vivant.roomee.json.JSONParser;
+import com.vivant.roomee.json.JSONParserImpl;
+import com.vivant.roomee.model.Constants;
 import com.vivant.roomee.model.Room;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class RoomListActivity extends Activity implements OnItemClickListener {
 
     //JSON Node names;
-    private final static String TAG_STATUS = "status";
-    private final static String TAG_MESSAGE = "message";
-    private final static String TAG_DATA = "data";
-    private final static String TAG_ROOMS = "rooms";
-    private final static String TAG_ID = "id";
-    private final static String TAG_NAME = "name";
-    private final static String TAG_FREEBUSY = "freebusy";
-    private final static String TAG_TIME = "time";
+    private boolean done;
     private JSONParser jsonParser;
     private ListView roomListView;
     private List<Room> roomList = new ArrayList<Room>();
@@ -41,6 +36,8 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_room_list);
+        done = false;
+
         //validates the oauth_token is exist
 //        Bundle extras = getIntent().getExtras();
 //        if(extras != null) {
@@ -77,30 +74,33 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
         protected Boolean doInBackground(String... strings) {
 
             //crate Json parser instance
-            jsonParser = new JSONParser();
+            jsonParser = new JSONParserImpl();
 
             //getting json string from url
 //            String url = "rooms?oauth_token=" + extras.getString("token");
-            String url = "rooms?oauth_token=e24cda222194876faaba860416f6ef126d328639";
+//            String url = "rooms?oauth_token=e24cda222194876faaba860416f6ef126d328639";
+            String url = "http://www.json-generator.com/j/bTwZCVTxiW?indent=4";
             JSONObject json = jsonParser.getJSONFromUrl(url);
             try{
-
-                String HttpStatus = json.getString(TAG_STATUS);
-                if(HttpStatus.equals("success"))
+                if(json != null)
                 {
-                    JSONObject data = json.getJSONObject(TAG_DATA);
-                    JSONArray rooms = data.getJSONArray(TAG_ROOMS);
-                    for(int i=0; i < rooms.length(); i++)
+                    String HttpStatus = json.getString(Constants.TAG_STATUS);
+                    if(HttpStatus.equals("success"))
                     {
-                        JSONObject JSONRoom = rooms.getJSONObject(i);
-                        int id = Integer.parseInt(JSONRoom.getString(TAG_ID));
-                        String name = JSONRoom.getString(TAG_NAME);
-                        int freeBusy = Integer.parseInt(JSONRoom.getString(TAG_FREEBUSY));
-                        String time = JSONRoom.getString(TAG_TIME);
-                        Room room = new Room(id,name,freeBusy,time);
-                        roomList.add(room);
+                        JSONObject data = json.getJSONObject(Constants.TAG_DATA);
+                        JSONArray rooms = data.getJSONArray(Constants.TAG_ROOMS);
+                        for(int i=0; i < rooms.length(); i++)
+                        {
+                            JSONObject JSONRoom = rooms.getJSONObject(i);
+                            int id = Integer.parseInt(JSONRoom.getString(Constants.TAG_ID));
+                            String name = JSONRoom.getString(Constants.TAG_NAME);
+                            int freeBusy = Integer.parseInt(JSONRoom.getString(Constants.TAG_FREEBUSY));
+                            String time = JSONRoom.getString(Constants.TAG_TIME);
+                            Room room = new Room(id,name,freeBusy,time);
+                            roomList.add(room);
+                        }
                     }
-                    //addRoomToListView();
+                done = true;
                 }
             }
             catch (JSONException e) {
@@ -115,10 +115,21 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
             //dismiss the loading dialog
             if(dialog.isShowing()) dialog.dismiss();
 
-            //update the room items to the list view
-            RoomListAdapter adapter = new RoomListAdapter(activity,roomList);
-            roomListView.setAdapter(adapter);
+            if(done == true)
+            {
+                //update the room items to the list view
+                RoomListAdapter adapter = new RoomListAdapter(activity,roomList);
+                roomListView.setAdapter(adapter);
+            }
+            else
+            {
+                //display invalid token Toast message
+                Toast toast = Toast.makeText(context, "Server internal error, please try again", Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.CENTER|Gravity.CENTER_HORIZONTAL, 0, 0);
+                toast.show();
+            }
         }
+
     }
 
     @Override

@@ -2,29 +2,29 @@ package com.vivant.roomee;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
-
-import com.vivant.roomee.adapter.MeetingTableHandler;
+import com.vivant.roomee.handler.MeetingTableHandler;
 import com.vivant.roomee.json.JSONParser;
 import com.vivant.roomee.json.JSONParserImpl;
 import com.vivant.roomee.model.Constants;
 import com.vivant.roomee.model.Meeting;
 import com.vivant.roomee.model.Room;
+import com.vivant.roomee.timeManager.TimeCalculator;
+import com.vivant.roomee.timeManager.TimeCalculatorImpl;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class RoomDetailsActivity extends Activity {
@@ -35,10 +35,10 @@ public class RoomDetailsActivity extends Activity {
     private List<Meeting> meetingList = new ArrayList<Meeting>();
     private JSONParser jsonParser;
     private MeetingTableHandler meetingTableHandler;
+    private TimeCalculator tc;
 
     //view components
-    private ImageView imageSearch;
-    private ImageView imageAdd;
+    private ImageButton imageButtonAdd;
     private LinearLayout headerLinerLayout;
     private LinearLayout roomInfoLinerLayout;
     private LinearLayout timeInfoLinerLayout;
@@ -55,6 +55,12 @@ public class RoomDetailsActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_room_details);
 
+        //initialise timeCalculator instance
+        tc = new TimeCalculatorImpl();
+
+        //get every view components in the RoomDetails activity
+        getViewComponents();
+
         //retrieve data passed from main activity
         Bundle extras = getIntent().getExtras();
         if(extras != null)
@@ -62,7 +68,9 @@ public class RoomDetailsActivity extends Activity {
             int status = extras.getInt("id");
             roomId = String.valueOf(status);
             token = extras.getString("token");
-            new ProgressTask(RoomDetailsActivity.this).execute();
+
+            //call ProgressRoomDetails to synchronise meeting room details with remote server
+            new ProgressRoomDetails(RoomDetailsActivity.this).execute();
         }
 
         //get the current time and updates in every sec.
@@ -71,62 +79,9 @@ public class RoomDetailsActivity extends Activity {
         timeThread= new Thread(myRunnableThread);
         timeThread.start();
 
-        //displays time table
-        meetingTableHeader = (TableLayout) findViewById(R.id.meetingTableHeader);
-        meetingTableTime = (TableLayout) findViewById(R.id.meetingTableTime);
-        meetingTableHandler = new MeetingTableHandler(RoomDetailsActivity.this, meetingTableHeader,meetingTableTime);
-        meetingTableHandler.setMeetingTableHeader();
-        meetingTableHandler.setMeetingTableTimeZone();
 
     }
 
-    private void displayItems() {
-
-        //get layout component
-        headerLinerLayout = (LinearLayout) findViewById(R.id.header);
-        roomInfoLinerLayout = (LinearLayout) findViewById(R.id.roomInfo);
-        timeInfoLinerLayout = (LinearLayout) findViewById(R.id.timeInfo);
-
-        //get each view component
-        txtRoomName = (TextView) findViewById(R.id.txtRoomName);
-        txtStatus = (TextView) findViewById(R.id.txtStatus);
-        txtTime = (TextView) findViewById(R.id.txtTime);
-        imageSearch = (ImageView) findViewById(R.id.imgSearch);
-        imageAdd = (ImageView) findViewById(R.id.imgAdd);
-        btnEndMeeting = (Button) findViewById(R.id.btnEndMeeting);
-        btnExtendMeeting = (Button) findViewById(R.id.btnExtendMeeting);
-
-        //set room details background upon the room status
-            //if room status is busy, then set bgcolor into red
-        if(room != null)
-        {
-            txtRoomName.setText(room.getName());
-            if(room.getStatus() == 1)
-            {
-                headerLinerLayout.setBackgroundColor(getResources().getColor(R.color.header_red));
-                roomInfoLinerLayout.setBackgroundColor(getResources().getColor(R.color.room_red));
-                timeInfoLinerLayout.setBackgroundColor(getResources().getColor(R.color.time_red));
-                btnExtendMeeting.setVisibility(View.VISIBLE);
-                btnEndMeeting.setVisibility(View.VISIBLE);
-                txtStatus.setText("Busy for");
-            }
-            else {
-                //if room status is free
-                headerLinerLayout.setBackgroundColor(getResources().getColor(R.color.header_green));
-                roomInfoLinerLayout.setBackgroundColor(getResources().getColor(R.color.room_green));
-                timeInfoLinerLayout.setBackgroundColor(getResources().getColor(R.color.time_green));
-                btnExtendMeeting.setVisibility(View.INVISIBLE);
-                btnEndMeeting.setVisibility(View.INVISIBLE);
-            }
-            // Apply RFC3339 format using JODA-TIME
-//            DateTime dateTime = new DateTime("2013-07-04T23:37:46.782Z", DateTimeZone.UTC);
-//            DateTimeFormatter dateFormatter = ISODateTimeFormat.dateTime();
-//            SimpleDateFormat sdf = new SimpleDateFormat("hh:mm aa");
-//            String time = sdf.format(room.getTime());
-//            txtTime.setText(time);
-            txtTime.setText(room.getTime());
-        }
-    }
 
     /**
      * this class implements runnable class and handles current time counting
@@ -147,17 +102,20 @@ public class RoomDetailsActivity extends Activity {
     }
 
     /**
-     * this methods calculates the current time and updates the time to the textView
+     * this methods get the current time and calculate the
+     * time difference between next meeting in every seconds
      */
     public void doWork() {
         runOnUiThread(new Runnable() {
             public void run() {
                 try{
+                    //get and set current time to the header view
                     TextView txtCurrentTime= (TextView)findViewById(R.id.txtCurrentTime);
-                    Date dt = new Date();
-                    SimpleDateFormat sdf = new SimpleDateFormat("hh:mm aa");
-                    String todayStr = sdf.format(dt);
-                    txtCurrentTime.setText(todayStr);
+                    txtCurrentTime.setText(tc.getCurrentTime());
+
+                    //calculate the time diff via timeCalculator class
+                    String timeDiff = tc.CalculateTimeDif(room.getTime());
+                    txtTime.setText(timeDiff);
                 }catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -168,20 +126,23 @@ public class RoomDetailsActivity extends Activity {
     /**
      * this progressTask class sends http request and it returns the json data of the rooms
      */
-    private class ProgressTask extends AsyncTask<String, Void, Boolean> {
+    private class ProgressRoomDetails extends AsyncTask<String, Void, Boolean> {
 
         private ProgressDialog dialog;
         private Activity activity;
         private Context context;
 
-        public ProgressTask(Activity activity) {
+        public ProgressRoomDetails(Activity activity) {
             this.activity = activity;
             context = activity;
             dialog = new ProgressDialog(context);
         }
 
+        /**
+         * onPreExecute initalise AuthenticationTask before it starts
+         */
         protected void onPreExecute() {
-            this.dialog.setMessage(" Loading room meetings... ");
+            this.dialog.setMessage(" Loading room details... ");
             this.dialog.show();
         }
 
@@ -191,8 +152,8 @@ public class RoomDetailsActivity extends Activity {
             jsonParser = new JSONParserImpl();
 
             //getting json string from url
-//            String url = "rooms/"+ roomId +"?oauth_token="+ token;
-            String url = "http://www.json-generator.com/j/bUIYPQhxYO?indent=4";
+            String url = "rooms/"+ roomId +"?oauth_token="+ token;
+//            String url = "http://www.json-generator.com/j/bUIYPQhxYO?indent=4";
             JSONObject json = jsonParser.getJSONFromUrl(url);
             try{
                 if(json != null)
@@ -237,10 +198,91 @@ public class RoomDetailsActivity extends Activity {
             //dismiss the loading dialog
             if(dialog.isShowing()) dialog.dismiss();
 
-            //update the room details to the view
+            //update the room and meeting timetable details to the view
             displayItems();
+            displayMeetingdetails();
         }
     }
+
+
+    /**
+     * this method displays meeting timetable and its meeting details
+     */
+    private void displayMeetingdetails() {
+
+        //displays meeting time table
+        meetingTableHeader = (TableLayout) findViewById(R.id.meetingTableHeader);
+        meetingTableTime = (TableLayout) findViewById(R.id.meetingTableTime);
+        meetingTableHandler = new MeetingTableHandler(RoomDetailsActivity.this, meetingTableHeader,meetingTableTime);
+        meetingTableHandler.setMeetingTableHeader();
+        meetingTableHandler.setMeetingTableTimeZone();
+    }
+
+
+    /**
+     * this method displays meeting room details
+     */
+    private void displayItems() {
+
+        //set room details background upon the room status
+        if(room != null)
+        {
+            if(room.getStatus() == 1)
+            {
+                //if room status is busy, then set colors into red
+                headerLinerLayout.setBackgroundColor(getResources().getColor(R.color.header_red));
+                roomInfoLinerLayout.setBackgroundColor(getResources().getColor(R.color.room_red));
+                timeInfoLinerLayout.setBackgroundColor(getResources().getColor(R.color.time_red));
+                btnExtendMeeting.setVisibility(View.VISIBLE);
+                btnEndMeeting.setVisibility(View.VISIBLE);
+                txtStatus.setText("Busy for");
+            }
+            else {
+                //if room status is free
+                headerLinerLayout.setBackgroundColor(getResources().getColor(R.color.header_green));
+                roomInfoLinerLayout.setBackgroundColor(getResources().getColor(R.color.room_green));
+                timeInfoLinerLayout.setBackgroundColor(getResources().getColor(R.color.time_green));
+                btnExtendMeeting.setVisibility(View.INVISIBLE);
+                btnEndMeeting.setVisibility(View.INVISIBLE);
+                txtStatus.setText("Free for");
+            }
+
+            //set value to the other room components
+            txtRoomName.setText(room.getName());
+            //calculate the time diff via timeCalculator class
+            String timeDiff = tc.CalculateTimeDif(room.getTime());
+            txtTime.setText(timeDiff);
+        }
+    }
+
+
+    private void getViewComponents()
+    {
+        //get layout component
+        headerLinerLayout = (LinearLayout) findViewById(R.id.header);
+        roomInfoLinerLayout = (LinearLayout) findViewById(R.id.roomInfo);
+        timeInfoLinerLayout = (LinearLayout) findViewById(R.id.timeInfo);
+
+        //get each view component
+        txtRoomName = (TextView) findViewById(R.id.txtRoomName);
+        txtStatus = (TextView) findViewById(R.id.txtStatus);
+        txtTime = (TextView) findViewById(R.id.txtTime);
+        imageButtonAdd = (ImageButton) findViewById(R.id.imgButtonAdd);
+        btnEndMeeting = (Button) findViewById(R.id.btnEndMeeting);
+        btnExtendMeeting = (Button) findViewById(R.id.btnExtendMeeting);
+    }
+
+
+    public void ImageButtonAddOnClick(View view)
+    {
+        Intent intent = new Intent(getApplicationContext(), AddMeetingActivity.class);
+        intent.putExtra("token", token);
+        intent.putExtra("id", room.getId());
+        startActivity(intent);
+
+    }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

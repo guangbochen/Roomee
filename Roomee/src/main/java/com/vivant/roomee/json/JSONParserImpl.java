@@ -36,8 +36,8 @@ public class JSONParserImpl implements JSONParser {
         //making HTTP request
         try {
             DefaultHttpClient httpClient = new DefaultHttpClient();
-//            String Url = defaultUrl + url;
-            String Url = url;
+            String Url = defaultUrl + url;
+//            String Url = url;
             HttpGet httpGet = new HttpGet(Url);
             HttpResponse httpResponse = httpClient.execute(httpGet);
             HttpEntity httpEntity = httpResponse.getEntity();

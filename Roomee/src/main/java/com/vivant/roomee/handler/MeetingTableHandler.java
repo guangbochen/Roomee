@@ -1,4 +1,4 @@
-package com.vivant.roomee.adapter;
+package com.vivant.roomee.handler;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -8,6 +8,11 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.vivant.roomee.R;
+import com.vivant.roomee.timeManager.TimeCalculator;
+import com.vivant.roomee.timeManager.TimeCalculatorImpl;
+
+import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by guangbo on 24/10/13.
@@ -17,11 +22,13 @@ public class MeetingTableHandler {
     private TableLayout meetingTableHeader;
     private TableLayout meetingTableTime;
     private Context context;
+    private TimeCalculator tc;
 
     public MeetingTableHandler(Context context, TableLayout meetingTableHeader, TableLayout meetingTableTime) {
         this.context = context;
         this.meetingTableHeader = meetingTableHeader;
         this.meetingTableTime = meetingTableTime;
+        tc = new TimeCalculatorImpl();
     }
 
     public void setMeetingTableHeader() {
@@ -31,6 +38,7 @@ public class MeetingTableHandler {
         header.setId(10);
 //        header.setBackgroundColor(Color.GRAY);
 
+        int index = 0;
         for(int i=0; i<36; i++)
         {
             TextView label_time = new TextView(context);
@@ -38,8 +46,13 @@ public class MeetingTableHandler {
             label_time.setTextColor(Color.WHITE);
             label_time.setId(i);
             String time = String.valueOf(i);
-            if(i%6 == 0 ) label_time.setText(time + " am");
-            if(i == 35 ) label_time.setText(time + " am");
+
+            //set gap between
+            if(i%6 == 0 || i == 35)
+            {
+                ArrayList<String> hours = tc.getCurrentAndNextHours();
+                label_time.setText(hours.get(index++));
+            }
 
             //add time zone
             header.addView(label_time);
@@ -54,7 +67,7 @@ public class MeetingTableHandler {
         //displays time table
         TableRow timeZone = new TableRow(context);
         timeZone.setId(20);
-        timeZone.setWeightSum(10.f);
+        timeZone.setWeightSum(1);
 
         for(int i=0; i<36; i++)
         {

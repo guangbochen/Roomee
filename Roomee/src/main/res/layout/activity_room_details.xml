@@ -7,11 +7,11 @@
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
-        android:layout_height="0dip"
+        android:layout_height="0dp"
         android:layout_weight="10" >
 
         <ImageButton
-            android:id="@+id/imgSearch"
+            android:id="@+id/imgButtonSearch"
             android:layout_weight="5"
             android:layout_height="match_parent"
             android:layout_width="match_parent"
@@ -28,11 +28,12 @@
             android:layout_weight="1"/>
 
         <ImageButton
-            android:id="@+id/imgAdd"
+            android:id="@+id/imgButtonAdd"
             android:layout_weight="5"
             android:layout_height="match_parent"
             android:layout_width="match_parent"
             android:src="@drawable/ic_action_new"
+            android:onClick="ImageButtonAddOnClick"
             android:background="@null" />
     </LinearLayout>
 
@@ -40,7 +41,7 @@
     <LinearLayout
         android:id="@+id/roomInfo"
         android:layout_width="match_parent"
-        android:layout_height="0dip"
+        android:layout_height="0dp"
         android:layout_weight="20"
         android:orientation="vertical" >
 
@@ -48,7 +49,7 @@
             android:id="@+id/txtRoomName"
             android:layout_width="match_parent"
             android:layout_weight="50"
-            android:layout_height="0dip"
+            android:layout_height="0dp"
             android:textColor="@color/white"
             android:textSize="22dp"
             android:gravity="center" />
@@ -58,7 +59,7 @@
             android:layout_width="wrap_content"
             android:id="@+id/imgAdd"
             android:layout_weight="50"
-            android:layout_height="0dip"
+            android:layout_height="0dp"
             android:src="@drawable/ic_action_refresh"
             android:background="@null" />
     </LinearLayout>
@@ -67,7 +68,7 @@
     <LinearLayout
         android:id="@+id/timeInfo"
         android:layout_width="match_parent"
-        android:layout_height="0dip"
+        android:layout_height="0dp"
         android:layout_weight="70"
         android:orientation="vertical"
         android:textColor="@color/white">
@@ -75,7 +76,7 @@
         <TextView
             android:id="@+id/txtStatus"
             android:layout_width="match_parent"
-            android:layout_height="0dip"
+            android:layout_height="0dp"
             android:layout_margin="5dp"
             android:layout_weight="10"
             android:textColor="@color/white"
@@ -85,8 +86,9 @@
         <TextView
             android:id="@+id/txtTime"
             android:layout_width="match_parent"
-            android:layout_height="0dip"
+            android:layout_height="0dp"
             android:layout_weight="35"
+            android:layout_gravity="center"
             android:textColor="@color/white"
             android:textSize="60dp"
             android:gravity="center" />
@@ -95,14 +97,14 @@
         <LinearLayout
             android:id="@+id/meetingFunctions"
             android:layout_width="300dp"
-            android:layout_height="0dip"
+            android:layout_height="0dp"
             android:orientation="horizontal"
             android:layout_gravity="center"
             android:layout_weight="15">
 
             <Button
                 android:id="@+id/btnEndMeeting"
-                android:layout_width="0dip"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:background="@drawable/action_button"
                 android:text="End"
@@ -132,7 +134,7 @@
         <TableLayout
             android:id="@+id/meetingTableHeader"
             android:layout_width="match_parent"
-            android:layout_height="0dip"
+            android:layout_height="0dp"
             android:orientation="vertical"
             android:stretchColumns="*"
             android:layout_margin="10dp"
@@ -143,13 +145,13 @@
         <TableLayout
             android:id="@+id/meetingTableTime"
             android:layout_width="match_parent"
-            android:layout_height="0dip"
+            android:layout_height="0dp"
             android:orientation="vertical"
             android:stretchColumns="*"
+            android:weightSum="1"
             android:paddingLeft="10dp"
             android:layout_margin="10dp"
             android:layout_weight="40">
-
 
         </TableLayout>
 

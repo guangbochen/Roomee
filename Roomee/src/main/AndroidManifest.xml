@@ -13,29 +13,37 @@
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
-        android:theme="@style/AppBaseTheme"
-        android:label="@string/app_name" >
+        android:label="@string/app_name"
+        android:theme="@style/AppBaseTheme" >
         <activity
             android:name="com.vivant.roomee.MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/welcome" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- RoomList activity  -->
         <activity
             android:name="com.vivant.roomee.RoomListActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_room_list" >
         </activity>
 
-        <!--defines roomDetails activity to take fullscreen-->
+        <!-- defines roomDetails activity to take fullscreen -->
         <activity
-            android:name=".RoomDetailsActivity"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:name="com.vivant.roomee.RoomDetailsActivity"
             android:configChanges="orientation|screenSize"
-            android:label="@string/title_activity_room_details" >
+            android:label="@string/title_activity_room_details"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
         </activity>
+
+        <activity android:name=".AddMeetingActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/title_activity_room_list" />
+
     </application>
 
 </manifest>

@@ -1,0 +1,111 @@
+package com.vivant.roomee.timeManager;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+/**
+ * This class calculates the time difference between current time and next meeting time
+ * Created by guangbo on 28/10/13.
+ */
+public class TimeCalculatorImpl implements  TimeCalculator{
+
+    private static SimpleDateFormat datetimeParser = null;
+    private static SimpleDateFormat timePrinter = null;
+    private static SimpleDateFormat datePrinter = null;
+    private static SimpleDateFormat hourPrinter = null;
+    private final static int SECONDS = 1000;
+    private final static int MINUTES = 60;
+    private final static int HOURS = 24;
+    private String currentTime;
+    private ArrayList<String> hours;
+
+
+    /**
+     * constructor
+     */
+    public TimeCalculatorImpl() {
+        //lazy init & re-use date time format
+        if(datetimeParser==null) {datetimeParser = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");};
+        if(datePrinter==null) {datePrinter = new SimpleDateFormat("yyyy-MM-dd");};
+        if(timePrinter==null) {timePrinter = new SimpleDateFormat("hh:mm aa");};
+        if(hourPrinter==null) {hourPrinter = new SimpleDateFormat("hh aa");};
+
+        currentTime = "";
+        hours = new ArrayList<String>();
+    }
+
+
+    public String getCurrentTime() {
+
+        Date dt = new Date();
+        currentTime = timePrinter.format(dt);
+        return  currentTime;
+    }
+
+    public ArrayList<String> getCurrentAndNextHours() {
+
+        Date previous_time = new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(previous_time);
+
+        for(int i=0; i<7; i++)
+        {
+            if(i==0) calendar.add(Calendar.HOUR, 0);
+            else  calendar.add(Calendar.HOUR, 1);
+            previous_time = calendar.getTime();
+            currentTime = hourPrinter.format(previous_time);
+            hours.add(currentTime);
+        }
+
+        return  hours;
+    }
+
+    /**
+     * this method calculates the time difference between current time and next meeting time
+     * @param nextMeeting, String RFC3339 date format
+     * @return timeDiff, String time difference
+     */
+    public String CalculateTimeDif(String nextMeeting) {
+
+        //special case when nextMeeting time is null
+        if(nextMeeting.equals("null")) return  "Forever";
+
+        try {
+            //get current date time
+            Date current = new Date();
+
+            //get next meeting date
+            Date next    = datetimeParser.parse(nextMeeting);
+
+            //calculate the time diff
+            long diff = next.getTime() - current.getTime();
+            //long diffSeconds = diff / SECONDS % MINUTES;
+            long diffMinutes = diff / (MINUTES * SECONDS) % MINUTES;
+            long diffHours = diff / (MINUTES * MINUTES * SECONDS) % HOURS;
+
+            String hours , minutes;
+
+            //manages the hours displaying
+            if (diffHours <= 0) hours = "";
+            else if(diffHours>1) hours = String.valueOf(diffHours) + " hours and ";
+            else  hours = String.valueOf(diffHours) + " hour and ";
+
+            //manages the minutes displaying
+            if(diffMinutes == 0) minutes = "";
+            else if(diffMinutes == 0 && diffHours ==0) return " 0 minutes";
+            else minutes = String.valueOf(diffMinutes) + " minutes";
+            return hours + minutes;
+
+        }
+        catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return "Forever";
+    }
+
+}

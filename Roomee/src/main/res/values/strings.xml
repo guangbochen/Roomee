@@ -4,11 +4,10 @@
     <string name="app_name">Roomee</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
-    <string name="title_activity_room_list">Roomee</string>
+    <string name="title_activity_room_list">Welcome to Roomee</string>
     <string name="title_activity_room_details">Roomee</string>
     <string name="Check">Check Room Status</string>
-
-
+    <string name="welcome">Welcome to Roomee</string>
 
     <color name="header_green">#38C27F</color>
     <color name="room_green">#4BC88C</color>
@@ -18,5 +17,7 @@
     <color name="time_red">#EF6A66</color>
     <color name="button_bg_red">#ED5752</color>
     <color name="white">#FFFFFF</color>
+
+    <string name="title_activity_add_meeting">Welcome to Roomee</string>
 
 </resources>

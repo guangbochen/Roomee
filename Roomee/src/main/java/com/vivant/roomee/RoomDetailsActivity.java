@@ -1,5 +1,6 @@
 package com.vivant.roomee;
 
+import android.app.ActionBar;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -65,8 +66,8 @@ public class RoomDetailsActivity extends Activity {
         Bundle extras = getIntent().getExtras();
         if(extras != null)
         {
-            int status = extras.getInt("id");
-            roomId = String.valueOf(status);
+            int id = extras.getInt("id");
+            roomId = String.valueOf(id);
             token = extras.getString("token");
 
             //call ProgressRoomDetails to synchronise meeting room details with remote server
@@ -277,7 +278,7 @@ public class RoomDetailsActivity extends Activity {
     {
         Intent intent = new Intent(getApplicationContext(), AddMeetingActivity.class);
         intent.putExtra("token", token);
-        intent.putExtra("id", room.getId());
+        intent.putExtra("roomId", room.getId());
         startActivity(intent);
 
     }
@@ -289,6 +290,16 @@ public class RoomDetailsActivity extends Activity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.room_details, menu);
         return true;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        // Save UI state changes to the savedInstanceState.
+        // This bundle will be passed to onCreate if the process is
+        // killed and restarted.
+        savedInstanceState.putString("id", roomId);
+        savedInstanceState.putString("token", token);
+        super.onSaveInstanceState(savedInstanceState);
     }
     
 }

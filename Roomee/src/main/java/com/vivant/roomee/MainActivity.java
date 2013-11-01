@@ -1,14 +1,17 @@
 package com.vivant.roomee;
 
+import android.app.ActionBar;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
 import com.vivant.roomee.json.JSONParser;
@@ -32,7 +35,14 @@ public class MainActivity extends Activity {
      */
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
+
+        //set custom title for the main activity
+        ActionBar ab = getActionBar();
+        ab.setTitle("Welcome to Roomee");
+        ab.setDisplayShowTitleEnabled(true);
 
     }
 
@@ -172,7 +182,7 @@ public class MainActivity extends Activity {
         public boolean onCreateOptionsMenu(Menu menu) {
             // Inflate the menu; this adds items to the action bar if it is present.
             getMenuInflater().inflate(R.menu.main, menu);
-            return true;
+            return false;
         }
     
 }

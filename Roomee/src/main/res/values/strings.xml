@@ -17,6 +17,15 @@
     <color name="time_red">#EF6A66</color>
     <color name="button_bg_red">#ED5752</color>
     <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="skyBlue">#60B2E6</color>
+    <color name="darkGreen">#1D845C</color>
+    <color name="action_bar_bg">#A7A7A7</color>
+
+    <color name="success">#49A434</color>
+    <color name="warning">#F0AE35</color>
+    <color name="primary">#418AD0</color>
+
 
     <string name="title_activity_add_meeting">Welcome to Roomee</string>
 

@@ -1,5 +1,6 @@
 package com.vivant.roomee;
 
+import android.app.ActionBar;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.app.Activity;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
@@ -39,7 +41,15 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_room_list);
+
+        //set custom title for the main activity
+        ActionBar ab = getActionBar();
+        ab.setTitle("Welcome to Roomee");
+        ab.setDisplayShowTitleEnabled(true);
+
         done = false;
 
         //validates the oauth_token is exist
@@ -166,7 +176,7 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.room_list, menu);
-        return true;
+        return false;
     }
 
     @Override

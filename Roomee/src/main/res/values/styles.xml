@@ -4,19 +4,20 @@
         Base application theme, dependent on API level. This theme is replaced
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
     -->
-    <style name="AppBaseTheme" parent="android:Theme.Light">
+    <style name="AppBaseTheme" parent="android:Theme.Holo.Light">
         <!--
             Theme customizations available in newer API levels can go in
             res/values-vXX/styles.xml, while customizations related to
             backward-compatibility can go here.
         -->
-        <!--<item name="android:windowTitleBackgroundStyle">@style/WindowTitleBackground</item>-->
+        <item name="android:actionBarStyle">@style/thin_ab_style</item>
     </style>
 
     <!-- Application theme. -->
-    <style name="WindowTitleBackground">
+    <style name="thin_ab_style" parent="android:Theme.Holo.Light">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
-        <item name="android:background">@color/header_green</item>
+        <item name="android:background">@color/action_bar_bg</item>
+        <item name="android:height">25dp</item>
     </style>
 
 </resources>

@@ -9,11 +9,13 @@
     android:orientation="vertical"
     android:gravity="center"
     android:layout_gravity="center"
+    android:focusable="false"
+    android:focusableInTouchMode="true"
     >
 
     <EditText
         android:id="@+id/txtAPIKey"
-        android:layout_width="300dp"
+        android:layout_width="260dp"
         android:layout_height="wrap_content"
         android:hint="Enter authentication key"
         android:layout_gravity="center"
@@ -23,9 +25,12 @@
 
     <Button
         android:id="@+id/btnLogin"
-        android:layout_width="300dp"
+        android:layout_marginTop="15dp"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:onClick="loginButtonOnClick"
+        android:singleLine="true"
+        android:background="@color/primary"
         android:layout_gravity="center"
         android:text="@string/Check" />
 

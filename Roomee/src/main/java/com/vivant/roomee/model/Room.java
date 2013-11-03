@@ -1,9 +1,11 @@
 package com.vivant.roomee.model;
 
+import java.io.Serializable;
+
 /**
  * Created by guangbo on 10/10/13.
  */
-public class Room {
+public class Room implements Serializable{
     private int id;
     private String name;
     private int status;

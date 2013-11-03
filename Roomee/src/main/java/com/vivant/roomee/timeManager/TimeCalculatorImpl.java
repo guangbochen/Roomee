@@ -107,5 +107,4 @@ public class TimeCalculatorImpl implements  TimeCalculator{
 
         return "Forever";
     }
-
 }

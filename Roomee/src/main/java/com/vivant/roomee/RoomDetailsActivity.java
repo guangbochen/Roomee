@@ -1,6 +1,5 @@
 package com.vivant.roomee;
 
-import android.app.ActionBar;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -26,20 +25,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.ArrayList;
-import java.util.List;
 
 public class RoomDetailsActivity extends Activity {
 
     private static String roomId;
     private static String token;
     private Room room;
-    private List<Meeting> meetingList = new ArrayList<Meeting>();
+    private ArrayList<Meeting> meetingList = new ArrayList<Meeting>();
     private JSONParser jsonParser;
     private MeetingTableHandler meetingTableHandler;
     private TimeCalculator tc;
 
     //view components
-    private ImageButton imageButtonAdd;
     private LinearLayout headerLinerLayout;
     private LinearLayout roomInfoLinerLayout;
     private LinearLayout timeInfoLinerLayout;
@@ -268,17 +265,18 @@ public class RoomDetailsActivity extends Activity {
         txtRoomName = (TextView) findViewById(R.id.txtRoomName);
         txtStatus = (TextView) findViewById(R.id.txtStatus);
         txtTime = (TextView) findViewById(R.id.txtTime);
-        imageButtonAdd = (ImageButton) findViewById(R.id.imgButtonAdd);
         btnEndMeeting = (Button) findViewById(R.id.btnEndMeeting);
         btnExtendMeeting = (Button) findViewById(R.id.btnExtendMeeting);
     }
 
 
-    public void ImageButtonAddOnClick(View view)
+    public void addNewMeetingOnClick(View view)
     {
         Intent intent = new Intent(getApplicationContext(), AddMeetingActivity.class);
         intent.putExtra("token", token);
         intent.putExtra("roomId", room.getId());
+        intent.putExtra("room", room);
+        intent.putParcelableArrayListExtra("meetingList", meetingList);
         startActivity(intent);
 
     }

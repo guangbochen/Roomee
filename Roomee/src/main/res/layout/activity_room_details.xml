@@ -33,7 +33,7 @@
             android:layout_height="match_parent"
             android:layout_width="match_parent"
             android:src="@drawable/ic_action_new"
-            android:onClick="ImageButtonAddOnClick"
+            android:onClick="addNewMeetingOnClick"
             android:background="@null" />
     </LinearLayout>
 

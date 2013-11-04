@@ -24,6 +24,8 @@ public class Constants {
     public final static String TAG_END = "end";
     //JSON Node for Auth
     public static final String TAG_OAUTH = "oauth_token";
+    //JSON Node for add new meeting
+    public static final String TAG_MEETING = "meeting";
 
 
     //Public Constants

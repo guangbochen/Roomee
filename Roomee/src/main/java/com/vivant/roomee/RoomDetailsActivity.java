@@ -46,7 +46,7 @@ public class RoomDetailsActivity extends Activity {
     private Button btnEndMeeting;
     private Button btnExtendMeeting;
     private TableLayout meetingTableHeader;
-    private TableLayout meetingTableTime;
+    private LinearLayout meetingTimeTable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,7 +151,6 @@ public class RoomDetailsActivity extends Activity {
 
             //getting json string from url
             String url = "rooms/"+ roomId +"?oauth_token="+ token;
-//            String url = "http://www.json-generator.com/j/bUIYPQhxYO?indent=4";
             JSONObject json = jsonParser.getJSONFromUrl(url);
             try{
                 if(json != null)
@@ -210,10 +209,10 @@ public class RoomDetailsActivity extends Activity {
 
         //displays meeting time table
         meetingTableHeader = (TableLayout) findViewById(R.id.meetingTableHeader);
-        meetingTableTime = (TableLayout) findViewById(R.id.meetingTableTime);
-        meetingTableHandler = new MeetingTableHandler(RoomDetailsActivity.this, meetingTableHeader,meetingTableTime);
+        meetingTimeTable = (LinearLayout) findViewById(R.id.meetingTableTime);
+        meetingTableHandler = new MeetingTableHandler(RoomDetailsActivity.this, meetingTableHeader,meetingTimeTable);
         meetingTableHandler.setMeetingTableHeader();
-        meetingTableHandler.setMeetingTableTimeZone();
+        meetingTableHandler.setMeetingTableTimeZone(meetingList);
     }
 
 
@@ -235,7 +234,8 @@ public class RoomDetailsActivity extends Activity {
                 btnEndMeeting.setVisibility(View.VISIBLE);
                 txtStatus.setText("Busy for");
             }
-            else {
+            else
+            {
                 //if room status is free
                 headerLinerLayout.setBackgroundColor(getResources().getColor(R.color.header_green));
                 roomInfoLinerLayout.setBackgroundColor(getResources().getColor(R.color.room_green));
@@ -291,13 +291,9 @@ public class RoomDetailsActivity extends Activity {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        // Save UI state changes to the savedInstanceState.
-        // This bundle will be passed to onCreate if the process is
-        // killed and restarted.
-        savedInstanceState.putString("id", roomId);
-        savedInstanceState.putString("token", token);
-        super.onSaveInstanceState(savedInstanceState);
+    public void onRestart() {
+        super.onResume();
+        new ProgressRoomDetails(RoomDetailsActivity.this).execute();
     }
-    
+
 }

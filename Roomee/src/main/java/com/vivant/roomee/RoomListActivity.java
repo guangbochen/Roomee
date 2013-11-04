@@ -34,7 +34,6 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
     private List<Room> roomList = new ArrayList<Room>();
     private String token;
 
-
     /**
      * onCreate method initialise the view of RoomListActivity
      */
@@ -180,10 +179,10 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
     }
 
     @Override
-    public void onResume() {
+    public void onRestart() {
         super.onResume();
         //get room json data via calling the progressTask
 //        roomList = new ArrayList<Room>();
-//        new ProgressTask(RoomListActivity.this).execute();
+//        new ProgressTask(RoomListActivity.this, token).execute();
     }
 }

@@ -15,6 +15,30 @@
         android:layout_height="match_parent" >
 
         <LinearLayout
+            android:id="@+id/layoutRoom"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content"
+            android:layout_width="500dp">
+            <TextView
+                android:layout_weight="2"
+                android:gravity="bottom"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:fontFamily="sans-serif"
+                android:textSize="15dp"
+                android:text="Meeting Room" />
+
+            <EditText
+                android:id="@+id/txtRoomName"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:editable="false" />
+
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/layoutSummary"
             android:orientation="horizontal"
             android:layout_gravity="center"
@@ -35,8 +59,7 @@
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
                 android:hint="Enter meeting summary"
-                android:text="test"
-                />
+                android:text="test" />
 
         </LinearLayout>
 

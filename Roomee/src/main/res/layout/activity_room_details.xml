@@ -137,23 +137,30 @@
             android:layout_height="0dp"
             android:orientation="vertical"
             android:stretchColumns="*"
-            android:layout_margin="10dp"
-            android:paddingLeft="10dp"
+            android:layout_margin="5dp"
+            android:paddingLeft="0dp"
             android:layout_weight="5">
         </TableLayout>
 
-        <TableLayout
-            android:id="@+id/meetingTableTime"
+        <LinearLayout
+            android:id="@+id/meetingTableLayout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:orientation="vertical"
-            android:stretchColumns="*"
-            android:weightSum="1"
             android:paddingLeft="10dp"
-            android:layout_margin="10dp"
+            android:layout_margin="5dp"
             android:layout_weight="40">
 
-        </TableLayout>
+
+            <LinearLayout
+                android:id="@+id/meetingTableTime"
+                android:orientation="horizontal"
+                android:layout_height="fill_parent"
+                android:layout_width="fill_parent">
+
+            </LinearLayout>
+
+        </LinearLayout>
 
     </LinearLayout>
 

@@ -1,5 +1,10 @@
 package com.vivant.roomee.timeManager;
 
+import android.provider.ContactsContract;
+import android.util.Log;
+
+import com.vivant.roomee.model.Constants;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,6 +22,7 @@ public class TimeCalculatorImpl implements  TimeCalculator{
     private static SimpleDateFormat timePrinter = null;
     private static SimpleDateFormat datePrinter = null;
     private static SimpleDateFormat hourPrinter = null;
+    private static SimpleDateFormat hourMinPrinter = null;
     private final static int SECONDS = 1000;
     private final static int MINUTES = 60;
     private final static int HOURS = 24;
@@ -33,6 +39,7 @@ public class TimeCalculatorImpl implements  TimeCalculator{
         if(datePrinter==null) {datePrinter = new SimpleDateFormat("yyyy-MM-dd");};
         if(timePrinter==null) {timePrinter = new SimpleDateFormat("hh:mm aa");};
         if(hourPrinter==null) {hourPrinter = new SimpleDateFormat("hh aa");};
+        if(hourMinPrinter==null) {hourMinPrinter = new SimpleDateFormat("hh:mm");};
 
         currentTime = "";
         hours = new ArrayList<String>();
@@ -96,8 +103,10 @@ public class TimeCalculatorImpl implements  TimeCalculator{
 
             //manages the minutes displaying
             if(diffMinutes == 0) minutes = "";
-            else if(diffMinutes == 0 && diffHours ==0) return " 0 minutes";
             else minutes = String.valueOf(diffMinutes) + " minutes";
+
+            //if both hour and minutes difference is 0, return 0 minutes
+            if(hours.length() == 0 && minutes.length() ==0) return " 0 minutes";
             return hours + minutes;
 
         }
@@ -107,4 +116,51 @@ public class TimeCalculatorImpl implements  TimeCalculator{
 
         return "Forever";
     }
+
+    /**
+     * this method check whether there is a existing meeting between selected time or not
+     * @param meetingStart, existing meeting start time
+     * @param meetingEnd, existing meeting end time
+     * @param startTime, new added meeting start time
+     * @param endTime, new added meeting end time
+     * @return true, if there is no existing meeting during the new meeting time
+     */
+    public boolean compareMeetingTime(String meetingStart, String meetingEnd, String startTime, String endTime)
+    {
+        try
+        {
+            //get the existing start meeting time
+            Date sMeeting = datetimeParser.parse(meetingStart);
+            //get the existing end meeting time
+            Date eMeeting = datetimeParser.parse(meetingEnd);
+            String sMeetingTime = sMeeting.getHours() + ":" + sMeeting.getMinutes();
+            String eMeetingTime = eMeeting.getHours() + ":" + eMeeting.getMinutes();
+
+            //if the new meeting time is before or after the existing meeting time then return as validated
+            if(startTime.compareTo(eMeetingTime) > 0 || endTime.compareTo(sMeetingTime) < 0)
+                return true;
+
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
+    /**
+     * this method returns date and time in RFC3339 format
+     * @param hour, selected meeting hour
+     * @param mins, selected meeting minutes
+     * @return time, String time in RFC3339 format
+     */
+    public String getRFCDateFormat(int hour, int mins)
+    {
+        Date date = new Date();
+        date.setHours(hour);
+        date.setMinutes(mins);
+        String time = datetimeParser.format(date);
+        return time;
+    }
+
 }

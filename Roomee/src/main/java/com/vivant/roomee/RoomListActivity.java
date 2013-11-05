@@ -33,6 +33,7 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
     private ListView roomListView;
     private List<Room> roomList = new ArrayList<Room>();
     private String token;
+//    private ProgressDialog dialog;
 
     /**
      * onCreate method initialise the view of RoomListActivity
@@ -72,10 +73,10 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
      */
     private class ProgressTask extends AsyncTask<String, Void, Boolean> {
 
-        private ProgressDialog dialog;
         private Activity activity;
         private Context context;
         private String token;
+        private ProgressDialog dialog;
 
         /**
          * ProgressTask constructor
@@ -83,16 +84,18 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
         public ProgressTask(Activity activity, String token) {
             this.activity = activity;
             context = activity;
-            dialog = new ProgressDialog(context);
             this.token = token;
+            dialog = new ProgressDialog(context);
         }
 
         /**
          * onPreExecute initialise ProgressTask before it starts
          */
         protected void onPreExecute() {
-            this.dialog.setMessage("Loading rooms...");
+            this.dialog.setMessage("Loading rooms ...");
             this.dialog.show();
+            this.dialog.setCanceledOnTouchOutside(false);
+            this.dialog.setCancelable(false);
         }
 
         /**
@@ -130,11 +133,6 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
             }
             catch (JSONException e) {
                 e.printStackTrace();
-
-                //display invalid token Toast message
-                Toast toast = Toast.makeText(context, "Server internal error, please try again", Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER|Gravity.CENTER_HORIZONTAL, 0, 0);
-                toast.show();
             }
             return null;
         }
@@ -154,6 +152,13 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
                 //update the room items to the list view
                 RoomListAdapter adapter = new RoomListAdapter(activity,roomList);
                 roomListView.setAdapter(adapter);
+            }
+            else
+            {
+                //display invalid token Toast message
+                Toast toast = Toast.makeText(context, "Server internal error, please try again", Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.CENTER|Gravity.CENTER_HORIZONTAL, 0, 0);
+                toast.show();
             }
         }
 
@@ -178,10 +183,13 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
         return false;
     }
 
+    /**
+     * this method manages activity being restarted from stopped state
+     */
     @Override
     public void onRestart() {
         super.onResume();
-        //get room json data via calling the progressTask
+        //update the room list via calling the progressTask
 //        roomList = new ArrayList<Room>();
 //        new ProgressTask(RoomListActivity.this, token).execute();
     }

@@ -26,6 +26,7 @@
     <color name="warning">#F0AE35</color>
     <color name="primary">#418AD0</color>
 
+    <color name="transparent">#30FFFFFF</color>
 
     <string name="title_activity_add_meeting">Welcome to Roomee</string>
 

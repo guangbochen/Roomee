@@ -104,7 +104,9 @@ public class MainActivity extends Activity {
          * onPreExecute initalise AuthenticationTask before it starts
          */
         protected void onPreExecute() {
+            this.message = "No internet connection";
             this.dialog.setMessage("Validating token...");
+            this.dialog.setCanceledOnTouchOutside(false);
             this.dialog.setCancelable(false);
             this.dialog.show();
         }
@@ -141,12 +143,7 @@ public class MainActivity extends Activity {
                 }
             }
             catch (JSONException e) {
-
                 e.printStackTrace();
-                //displays server internal error message
-                Toast toast = Toast.makeText(context, "Server internal error, please try again", Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.CENTER|Gravity.CENTER_HORIZONTAL, 0, 0);
-                toast.show();
             }
             return null;
         }
@@ -178,11 +175,11 @@ public class MainActivity extends Activity {
         }
     }
 
-        @Override
-        public boolean onCreateOptionsMenu(Menu menu) {
-            // Inflate the menu; this adds items to the action bar if it is present.
-            getMenuInflater().inflate(R.menu.main, menu);
-            return false;
-        }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return false;
+    }
     
 }

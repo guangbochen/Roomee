@@ -35,6 +35,7 @@ public class RoomDetailsActivity extends Activity {
     private JSONParser jsonParser;
     private MeetingTableHandler meetingTableHandler;
     private TimeCalculator tc;
+    private ProgressDialog dialog;
 
     //view components
     private LinearLayout headerLinerLayout;
@@ -45,7 +46,7 @@ public class RoomDetailsActivity extends Activity {
     private TextView txtTime;
     private Button btnEndMeeting;
     private Button btnExtendMeeting;
-    private TableLayout meetingTableHeader;
+    private LinearLayout meetingTableHeader;
     private LinearLayout meetingTimeTable;
 
     @Override
@@ -68,10 +69,15 @@ public class RoomDetailsActivity extends Activity {
             token = extras.getString("token");
 
             //call ProgressRoomDetails to synchronise meeting room details with remote server
+            dialog = new ProgressDialog(RoomDetailsActivity.this);
+            this.dialog.setMessage(" Loading room details ... ");
+            this.dialog.show();
+            this.dialog.setCanceledOnTouchOutside(false);
+            this.dialog.setCancelable(false);
             new ProgressRoomDetails(RoomDetailsActivity.this).execute();
         }
 
-        //get the current time and updates in every sec.
+        //get the current time and updates in every 1 sec.
         Thread timeThread = null;
         Runnable myRunnableThread = new CountDownRunner();
         timeThread= new Thread(myRunnableThread);
@@ -125,24 +131,18 @@ public class RoomDetailsActivity extends Activity {
      * this progressTask class sends http request and it returns the json data of the rooms
      */
     private class ProgressRoomDetails extends AsyncTask<String, Void, Boolean> {
-
-        private ProgressDialog dialog;
         private Activity activity;
         private Context context;
 
         public ProgressRoomDetails(Activity activity) {
             this.activity = activity;
             context = activity;
-            dialog = new ProgressDialog(context);
         }
 
         /**
          * onPreExecute initalise AuthenticationTask before it starts
          */
-        protected void onPreExecute() {
-            this.dialog.setMessage(" Loading room details... ");
-            this.dialog.show();
-        }
+        protected void onPreExecute() {}
 
         @Override
         protected Boolean doInBackground(String... strings) {
@@ -208,8 +208,10 @@ public class RoomDetailsActivity extends Activity {
     private void displayMeetingdetails() {
 
         //displays meeting time table
-        meetingTableHeader = (TableLayout) findViewById(R.id.meetingTableHeader);
+        meetingTableHeader = (LinearLayout) findViewById(R.id.meetingTableHeader);
         meetingTimeTable = (LinearLayout) findViewById(R.id.meetingTableTime);
+        meetingTableHeader.removeAllViews();
+        meetingTimeTable.removeAllViews();
         meetingTableHandler = new MeetingTableHandler(RoomDetailsActivity.this, meetingTableHeader,meetingTimeTable);
         meetingTableHandler.setMeetingTableHeader();
         meetingTableHandler.setMeetingTableTimeZone(meetingList);
@@ -281,8 +283,6 @@ public class RoomDetailsActivity extends Activity {
 
     }
 
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -290,6 +290,9 @@ public class RoomDetailsActivity extends Activity {
         return true;
     }
 
+    /**
+     * this method manages activity being restarted from stopped state
+     */
     @Override
     public void onRestart() {
         super.onResume();

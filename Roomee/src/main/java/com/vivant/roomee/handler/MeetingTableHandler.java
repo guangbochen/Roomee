@@ -2,7 +2,9 @@ package com.vivant.roomee.handler;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -11,7 +13,12 @@ import com.vivant.roomee.R;
 import com.vivant.roomee.model.Meeting;
 import com.vivant.roomee.timeManager.TimeCalculator;
 import com.vivant.roomee.timeManager.TimeCalculatorImpl;
+
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
+import java.util.Date;
+
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 /**
@@ -19,12 +26,20 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
  */
 public class MeetingTableHandler {
 
-    private TableLayout meetingTableHeader;
+    private LinearLayout meetingTableHeader;
     private LinearLayout meetingTimeTable;
     private Context context;
     private TimeCalculator tc;
+    private static ArrayList<String> hours;
+    private final static int HOUR = 60;
 
-    public MeetingTableHandler(Context context, TableLayout meetingTableHeader, LinearLayout meetingTimeTable) {
+    /**
+     * default constructor initialise instances
+     * @param context
+     * @param meetingTableHeader
+     * @param meetingTimeTable
+     */
+    public MeetingTableHandler(Context context, LinearLayout meetingTableHeader, LinearLayout meetingTimeTable) {
         this.context = context;
         this.meetingTableHeader = meetingTableHeader;
         this.meetingTimeTable =  meetingTimeTable;
@@ -32,54 +47,88 @@ public class MeetingTableHandler {
     }
 
     public void setMeetingTableHeader() {
-
         //displays time table
-        TableRow header = new TableRow(context);
-        header.setId(10);
-//        header.setBackgroundColor(Color.GRAY);
-
-        int index = 0;
+        hours = new ArrayList<String>();
+        hours = tc.getCurrentAndNextHours();
+        int index  =0;
         for(int i=0; i<12; i++)
         {
             TextView label_time = new TextView(context);
-            label_time.setGravity(Gravity.CENTER);
             label_time.setTextColor(Color.WHITE);
-            label_time.setId(i);
-            String time = String.valueOf(i);
-
-            //set gap between
-            if(i%2 == 0 || i == 11)
+            if(i%2 ==0)
             {
-                ArrayList<String> hours = tc.getCurrentAndNextHours();
-                label_time.setText(hours.get(index++));
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.MATCH_PARENT, 1f);
+                if(i!=0) lp.setMargins(-20,0,0,0);
+                label_time.setText(hours.get(index));
+                label_time.setLayoutParams(lp);
+                index++;
             }
-
+            else
+            {
+                label_time.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.MATCH_PARENT, 1f));
+                if(i==11)
+                {
+                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.MATCH_PARENT, 1f);
+                    lp.setMargins(0,0,0,0);
+                    //get last hour element
+                    label_time.setText(hours.get(6));
+                    label_time.setGravity(Gravity.RIGHT);
+                    label_time.setLayoutParams(lp);
+                }
+            }
             //add time zone
-            header.addView(label_time);
+            meetingTableHeader.addView(label_time);
         }
-
-        meetingTableHeader.addView(header);
     }
-
 
     public void setMeetingTableTimeZone(ArrayList<Meeting> meetings)
     {
-        for(int i=0; i<12; i++)
+        int totalHours = 6;
+        int tableWidth = meetingTimeTable.getWidth();
+        int hourWidth = tableWidth / totalHours;
+        for(Meeting m : meetings)
         {
-            TextView ten_sec = new TextView(context);
-            ten_sec.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.MATCH_PARENT, 1f));
-            ten_sec.setTextColor(Color.WHITE);
-//            ten_sec.setText(String.valueOf(i));
-            for(Meeting m : meetings)
-            {
-                ten_sec.setBackgroundResource(R.drawable.table_shape);
-            }
-            //ten_sec.setBackgroundResource(R.drawable.table_shape);
+            //calculates the meeting duration
+            int duration = tc.calculatesDuration(m.getStart(),m.getEnd());
+            int width = ((duration*100)/HOUR)*hourWidth/100;
 
-            meetingTimeTable.addView(ten_sec);
+            //calculates the start position of the meeting
+            Date startTime = tc.getRegularDateFormat(m.getStart());
+            getStartPositon(startTime);
+
+
+            //add meeting view to the meeting time table
+            TextView meeting = new TextView(context);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
+            lp.setMargins(0,0,0,0);
+            meeting.setLayoutParams(lp);
+            meeting.setBackgroundColor(R.color.transparent);
+            meeting.setBackgroundResource(R.drawable.table_shape);
+            meeting.setTextColor(Color.WHITE);
+            meeting.setGravity(Gravity.CENTER);
+            meeting.setText(m.getSummary());
+            meeting.setWidth((int)width);
+            meetingTimeTable.addView(meeting);
         }
     }
 
+
+    private int getStartPositon(Date startTime)
+    {
+        int position = 0;
+        Date time = new Date();
+        if(startTime.getHours() >= time.getHours())
+        {
+            //calculates the meeting duration
+//            int duration = tc.calculatesDuration(m.getStart(),startTime);
+//            int width = ((duration*100)/HOUR)*hourWidth/100;
+        }
+
+        return  position;
+    }
 
 
 }

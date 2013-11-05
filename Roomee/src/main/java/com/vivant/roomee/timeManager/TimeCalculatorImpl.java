@@ -31,7 +31,7 @@ public class TimeCalculatorImpl implements  TimeCalculator{
 
 
     /**
-     * constructor
+     * default constructor initialise instances
      */
     public TimeCalculatorImpl() {
         //lazy init & re-use date time format
@@ -42,10 +42,12 @@ public class TimeCalculatorImpl implements  TimeCalculator{
         if(hourMinPrinter==null) {hourMinPrinter = new SimpleDateFormat("hh:mm");};
 
         currentTime = "";
-        hours = new ArrayList<String>();
     }
 
-
+    /**
+     * this method returns the current time
+     * @return currentTime, String time in timePrinter format
+     */
     public String getCurrentTime() {
 
         Date dt = new Date();
@@ -53,8 +55,13 @@ public class TimeCalculatorImpl implements  TimeCalculator{
         return  currentTime;
     }
 
+    /**
+     * this method returns a list of time upon the current time
+     * @return hours, ArrayList of String for the current and next 6 hours time
+     */
     public ArrayList<String> getCurrentAndNextHours() {
 
+        hours = new ArrayList<String>();
         Date previous_time = new Date();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(previous_time);
@@ -67,7 +74,6 @@ public class TimeCalculatorImpl implements  TimeCalculator{
             currentTime = hourPrinter.format(previous_time);
             hours.add(currentTime);
         }
-
         return  hours;
     }
 
@@ -118,7 +124,7 @@ public class TimeCalculatorImpl implements  TimeCalculator{
     }
 
     /**
-     * this method check whether there is a existing meeting between selected time or not
+     * this method check whether the room is already booked by another meeting or not
      * @param meetingStart, existing meeting start time
      * @param meetingEnd, existing meeting end time
      * @param startTime, new added meeting start time
@@ -161,6 +167,47 @@ public class TimeCalculatorImpl implements  TimeCalculator{
         date.setMinutes(mins);
         String time = datetimeParser.format(date);
         return time;
+    }
+
+    public Date getRegularDateFormat(String RFCTime)
+    {
+        Date date = new Date();
+        try
+        {
+            date = datetimeParser.parse(RFCTime);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return date;
+    }
+
+    /**
+     * this method calculates meeting duration in minutes
+     * @param startTime, String start meeting time
+     * @param endTime, String end meeting time
+     * @return duration, int meeting duration in minutes
+     */
+    public int calculatesDuration(String startTime, String endTime)
+    {
+        int duration =0;
+        try
+        {
+            Date start = datetimeParser.parse(startTime);
+            Date end = datetimeParser.parse(endTime);
+            //in milliseconds
+            long diff = end.getTime() - start.getTime();
+            long diffMinutes = diff / (60 * 1000);
+            duration = (int) diffMinutes;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return duration;
     }
 
 }

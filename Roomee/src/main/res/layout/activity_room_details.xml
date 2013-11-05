@@ -55,9 +55,9 @@
             android:gravity="center" />
 
         <ImageButton
+            android:id="@+id/imgButtonRefresh"
             android:layout_gravity="center"
             android:layout_width="wrap_content"
-            android:id="@+id/imgAdd"
             android:layout_weight="50"
             android:layout_height="0dp"
             android:src="@drawable/ic_action_refresh"
@@ -131,35 +131,35 @@
         </LinearLayout>
 
         <!--table layout contains the time frame-->
-        <TableLayout
+        <LinearLayout
             android:id="@+id/meetingTableHeader"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:orientation="vertical"
-            android:stretchColumns="*"
-            android:layout_margin="5dp"
-            android:paddingLeft="0dp"
+            android:orientation="horizontal"
+            android:layout_marginRight="20dp"
+            android:layout_marginLeft="20dp"
             android:layout_weight="5">
-        </TableLayout>
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/meetingTableLayout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:orientation="vertical"
-            android:paddingLeft="10dp"
-            android:layout_margin="5dp"
+            android:layout_gravity="left"
+            android:gravity="left"
+            android:layout_marginRight="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
             android:layout_weight="40">
-
 
             <LinearLayout
                 android:id="@+id/meetingTableTime"
                 android:orientation="horizontal"
                 android:layout_height="fill_parent"
                 android:layout_width="fill_parent">
-
             </LinearLayout>
-
         </LinearLayout>
 
     </LinearLayout>

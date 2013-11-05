@@ -58,6 +58,11 @@ public class AddMeetingActivity extends Activity {
     private static String startTime;
     private static String endTime;
 
+
+    /**
+     * the onCreated method initialise the add new meeting view once it is start
+     * @param savedInstanceState
+     */
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -169,7 +174,7 @@ public class AddMeetingActivity extends Activity {
                 String eTime = mEndHour + ":" + mEndMin;
                 if(!tc.compareMeetingTime(sMeeting,eMeeting, sTime, eTime))
                 {
-                    String message = "The room is already booked by the other meeting between the selected time";
+                    String message = "The room is already booked by another meeting between the selected time";
                     invalidMessage(message);
                     return false;
                 }
@@ -306,18 +311,11 @@ public class AddMeetingActivity extends Activity {
 //                        token = data.getString(Constants.TAG_OAUTH);
                         done = true;
                     }
-                    else
-                    {
-                        message = "Server internal error, please try again";
-                        invalidMessage(message);
-                    }
                 }
             }
             catch (Exception e) {
 
                 e.printStackTrace();
-                message = "Submission failed, please try again";
-                invalidMessage(message);
             }
             return null;
         }
@@ -335,7 +333,7 @@ public class AddMeetingActivity extends Activity {
             if(done == true)
             {
                 AlertDialog.Builder builder = new AlertDialog.Builder(AddMeetingActivity.this);
-                builder.setMessage("Thanks, you have added new meeting successfully.")
+                builder.setMessage("Thanks, you have created new meeting successfully.")
                         .setCancelable(false)
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
@@ -344,6 +342,11 @@ public class AddMeetingActivity extends Activity {
                         });
                 AlertDialog alert = builder.create();
                 alert.show();
+            }
+            else
+            {
+                message = "Submission failed, please try again";
+                invalidMessage(message);
             }
         }
     }

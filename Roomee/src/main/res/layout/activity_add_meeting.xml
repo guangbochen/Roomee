@@ -58,8 +58,10 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
+                android:maxLength="30"
+                android:maxLines="1"
                 android:hint="Enter meeting summary"
-                android:text="test" />
+                android:text="New Meeting CatchUp" />
 
         </LinearLayout>
 
@@ -83,8 +85,10 @@
             android:layout_weight="1"
             android:layout_height="match_parent"
             android:layout_width="match_parent"
+            android:maxLength="50"
+            android:maxLines="1"
             android:hint="Enter meeting description"
-            android:text="test"
+            android:text="This is test description"
             />
 
         </LinearLayout>

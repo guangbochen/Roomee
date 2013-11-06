@@ -59,7 +59,7 @@ public class MainActivity extends Activity {
             //if is empty displays error message
             if(apiKey.equals(""))
             {
-                Toast toast = Toast.makeText(getApplicationContext(), "Empty API Key", Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(getApplicationContext(), "Empty Authentication Key", Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.CENTER|Gravity.CENTER_HORIZONTAL, 0, 0);
                 toast.show();
             }
@@ -105,7 +105,7 @@ public class MainActivity extends Activity {
          */
         protected void onPreExecute() {
             this.message = "No internet connection";
-            this.dialog.setMessage("Validating token...");
+            this.dialog.setMessage("Validating authentication key...");
             this.dialog.setCanceledOnTouchOutside(false);
             this.dialog.setCancelable(false);
             this.dialog.show();

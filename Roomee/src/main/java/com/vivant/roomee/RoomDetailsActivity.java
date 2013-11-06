@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import com.vivant.roomee.handler.MeetingTableHandler;
@@ -46,8 +47,11 @@ public class RoomDetailsActivity extends Activity {
     private TextView txtTime;
     private Button btnEndMeeting;
     private Button btnExtendMeeting;
+    //view components for meeting table
     private LinearLayout meetingTableHeader;
-    private LinearLayout meetingTimeTable;
+    private RelativeLayout meetingTimeTable;
+    private LinearLayout meetingTimelineHeader;
+    private LinearLayout meetingTimelineFooter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,7 +122,7 @@ public class RoomDetailsActivity extends Activity {
                     txtCurrentTime.setText(tc.getCurrentTime());
 
                     //calculate the time diff via timeCalculator class
-                    String timeDiff = tc.CalculateTimeDif(room.getTime());
+                    String timeDiff = tc.calculateTimeDiff(room.getTime());
                     txtTime.setText(timeDiff);
                 }catch (Exception e) {
                     e.printStackTrace();
@@ -138,16 +142,17 @@ public class RoomDetailsActivity extends Activity {
             this.activity = activity;
             context = activity;
         }
-
         /**
          * onPreExecute initalise AuthenticationTask before it starts
+
          */
-        protected void onPreExecute() {}
+        protected void onPreExecute() { }
 
         @Override
         protected Boolean doInBackground(String... strings) {
             //crate Json parser instance
             jsonParser = new JSONParserImpl();
+            meetingList = new ArrayList<Meeting>();
 
             //getting json string from url
             String url = "rooms/"+ roomId +"?oauth_token="+ token;
@@ -208,13 +213,16 @@ public class RoomDetailsActivity extends Activity {
     private void displayMeetingdetails() {
 
         //displays meeting time table
-        meetingTableHeader = (LinearLayout) findViewById(R.id.meetingTableHeader);
-        meetingTimeTable = (LinearLayout) findViewById(R.id.meetingTableTime);
         meetingTableHeader.removeAllViews();
         meetingTimeTable.removeAllViews();
-        meetingTableHandler = new MeetingTableHandler(RoomDetailsActivity.this, meetingTableHeader,meetingTimeTable);
+        meetingTimelineHeader.removeAllViews();
+        meetingTimelineFooter.removeAllViews();
+        meetingTableHandler = new MeetingTableHandler(RoomDetailsActivity.this, meetingTableHeader,
+                meetingTimeTable, meetingTimelineHeader, meetingTimelineFooter);
+        meetingTableHandler.setMeetingTimeLineHeader();
+        meetingTableHandler.setMeetingTimeLineFooter();
         meetingTableHandler.setMeetingTableHeader();
-        meetingTableHandler.setMeetingTableTimeZone(meetingList);
+        meetingTableHandler.addMeetingToTimeTable(meetingList);
     }
 
 
@@ -250,7 +258,7 @@ public class RoomDetailsActivity extends Activity {
             //set value to the other room components
             txtRoomName.setText(room.getName());
             //calculate the time diff via timeCalculator class
-            String timeDiff = tc.CalculateTimeDif(room.getTime());
+            String timeDiff = tc.calculateTimeDiff(room.getTime());
             txtTime.setText(timeDiff);
         }
     }
@@ -262,6 +270,10 @@ public class RoomDetailsActivity extends Activity {
         headerLinerLayout = (LinearLayout) findViewById(R.id.header);
         roomInfoLinerLayout = (LinearLayout) findViewById(R.id.roomInfo);
         timeInfoLinerLayout = (LinearLayout) findViewById(R.id.timeInfo);
+        meetingTableHeader = (LinearLayout) findViewById(R.id.meetingTableHeader);
+        meetingTimeTable = (RelativeLayout) findViewById(R.id.meetingTableTime);
+        meetingTimelineHeader = (LinearLayout) findViewById(R.id.meetingTimeLineHeader);
+        meetingTimelineFooter = (LinearLayout) findViewById(R.id.meetingTimeLineFooter);
 
         //get each view component
         txtRoomName = (TextView) findViewById(R.id.txtRoomName);
@@ -272,6 +284,10 @@ public class RoomDetailsActivity extends Activity {
     }
 
 
+    /**
+     * this method handles add new meeting button onClick event
+     * @param view, Image Button
+     */
     public void addNewMeetingOnClick(View view)
     {
         Intent intent = new Intent(getApplicationContext(), AddMeetingActivity.class);
@@ -287,7 +303,7 @@ public class RoomDetailsActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.room_details, menu);
-        return true;
+        return false;
     }
 
     /**

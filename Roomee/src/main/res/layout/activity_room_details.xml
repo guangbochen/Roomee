@@ -7,7 +7,7 @@
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="0sp"
         android:layout_weight="10" >
 
         <ImageButton
@@ -23,7 +23,7 @@
             android:layout_height="match_parent"
             android:layout_width="match_parent"
             android:textColor="@color/white"
-            android:textSize="20dp"
+            android:textSize="20sp"
             android:gravity="center"
             android:layout_weight="1"/>
 
@@ -41,79 +41,83 @@
     <LinearLayout
         android:id="@+id/roomInfo"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="20"
+        android:layout_height="0sp"
+        android:layout_weight="15"
         android:orientation="vertical" >
 
         <TextView
             android:id="@+id/txtRoomName"
             android:layout_width="match_parent"
             android:layout_weight="50"
-            android:layout_height="0dp"
+            android:layout_height="0sp"
             android:textColor="@color/white"
-            android:textSize="22dp"
+            android:textSize="30sp"
             android:gravity="center" />
-
-        <ImageButton
-            android:id="@+id/imgButtonRefresh"
-            android:layout_gravity="center"
-            android:layout_width="wrap_content"
-            android:layout_weight="50"
-            android:layout_height="0dp"
-            android:src="@drawable/ic_action_refresh"
-            android:background="@null" />
+        <!--<ImageButton-->
+            <!--android:id="@+id/imgButtonRefresh"-->
+            <!--android:layout_gravity="center"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_weight="50"-->
+            <!--android:layout_height="0dp"-->
+            <!--android:src="@drawable/ic_action_refresh"-->
+            <!--android:background="@null" />-->
     </LinearLayout>
 
     <!--this linearLayout contains the time details(70%)-->
     <LinearLayout
         android:id="@+id/timeInfo"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="70"
+        android:layout_height="0sp"
+        android:layout_weight="75"
         android:orientation="vertical"
         android:textColor="@color/white">
 
         <TextView
             android:id="@+id/txtStatus"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_margin="5dp"
+            android:layout_height="0sp"
             android:layout_weight="10"
+            android:layout_margin="5sp"
             android:textColor="@color/white"
+            android:textSize="16sp"
             android:gravity="center" />
 
         <!--this textView shows room free or busy time-->
         <TextView
             android:id="@+id/txtTime"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="0sp"
             android:layout_weight="35"
             android:layout_gravity="center"
             android:textColor="@color/white"
-            android:textSize="60dp"
+            android:textSize="70sp"
             android:gravity="center" />
 
         <!--this linearLayout contians button for managing meeting actions-->
         <LinearLayout
             android:id="@+id/meetingFunctions"
             android:layout_width="300dp"
-            android:layout_height="0dp"
+            android:layout_height="0sp"
             android:orientation="horizontal"
             android:layout_gravity="center"
+            android:layout_marginTop="-10sp"
+            android:layout_marginBottom="10sp"
+            android:layout_marginRight="5sp"
+            android:layout_marginLeft="5sp"
             android:layout_weight="15">
 
             <Button
                 android:id="@+id/btnEndMeeting"
-                android:layout_width="0dp"
+                android:layout_width="0sp"
                 android:layout_height="match_parent"
-                android:background="@drawable/action_button"
-                android:text="End"
-                android:textColor="@color/white"
-                android:textSize="20dp"
                 android:layout_weight="1"
+                android:background="@drawable/action_button"
+                android:textColor="@color/white"
+                android:textSize="18sp"
                 android:drawableLeft="@drawable/ic_action_end"
                 android:visibility="invisible"
-                android:paddingLeft="15dp" />
+                android:paddingLeft="15sp"
+                android:text="End" />
 
             <Button
                 android:id="@+id/btnExtendMeeting"
@@ -122,44 +126,59 @@
                 android:layout_marginLeft="40dp"
                 android:background="@drawable/action_button"
                 android:textColor="@color/white"
-                android:textSize="20dp"
-                android:text="Extend"
+                android:textSize="18sp"
                 android:layout_weight="1"
                 android:visibility="invisible"
                 android:drawableLeft="@drawable/ic_action_expand"
-                android:paddingLeft="15dp" />
+                android:paddingLeft="17sp"
+                android:text="Extend" />
         </LinearLayout>
 
         <!--table layout contains the time frame-->
         <LinearLayout
             android:id="@+id/meetingTableHeader"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="0sp"
             android:orientation="horizontal"
-            android:layout_marginRight="20dp"
-            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20sp"
+            android:layout_marginLeft="20sp"
+            android:layout_gravity="center"
+            android:gravity="center"
             android:layout_weight="5">
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/meetingTableLayout"
+            android:id="@+id/meetingTimeLineHeader"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:orientation="vertical"
-            android:layout_gravity="left"
-            android:gravity="left"
-            android:layout_marginRight="20dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_weight="40">
+            android:layout_height="0sp"
+            android:orientation="horizontal"
+            android:layout_marginRight="20sp"
+            android:layout_marginLeft="20sp"
+            android:layout_marginTop="5sp"
+            android:layout_weight="1">
+        </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/meetingTableTime"
-                android:orientation="horizontal"
-                android:layout_height="fill_parent"
-                android:layout_width="fill_parent">
-            </LinearLayout>
+        <RelativeLayout
+            android:id="@+id/meetingTableTime"
+            android:orientation="horizontal"
+            android:layout_height="0dp"
+            android:layout_width="fill_parent"
+            android:layout_marginRight="20sp"
+            android:layout_marginLeft="20sp"
+            android:layout_marginBottom="10sp"
+            android:layout_marginTop="10sp"
+            android:layout_weight="30">
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/meetingTimeLineFooter"
+            android:layout_width="match_parent"
+            android:layout_height="0sp"
+            android:orientation="horizontal"
+            android:layout_marginRight="20sp"
+            android:layout_marginLeft="20sp"
+            android:layout_marginBottom="15sp"
+            android:layout_weight="1">
         </LinearLayout>
 
     </LinearLayout>

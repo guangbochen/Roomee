@@ -26,7 +26,6 @@ public class TimeCalculatorImpl implements  TimeCalculator{
     private final static int SECONDS = 1000;
     private final static int MINUTES = 60;
     private final static int HOURS = 24;
-    private String currentTime;
     private ArrayList<String> hours;
 
 
@@ -40,8 +39,6 @@ public class TimeCalculatorImpl implements  TimeCalculator{
         if(timePrinter==null) {timePrinter = new SimpleDateFormat("hh:mm aa");};
         if(hourPrinter==null) {hourPrinter = new SimpleDateFormat("hh aa");};
         if(hourMinPrinter==null) {hourMinPrinter = new SimpleDateFormat("hh:mm");};
-
-        currentTime = "";
     }
 
     /**
@@ -51,7 +48,7 @@ public class TimeCalculatorImpl implements  TimeCalculator{
     public String getCurrentTime() {
 
         Date dt = new Date();
-        currentTime = timePrinter.format(dt);
+        String currentTime = timePrinter.format(dt);
         return  currentTime;
     }
 
@@ -71,7 +68,8 @@ public class TimeCalculatorImpl implements  TimeCalculator{
             if(i==0) calendar.add(Calendar.HOUR, 0);
             else  calendar.add(Calendar.HOUR, 1);
             previous_time = calendar.getTime();
-            currentTime = hourPrinter.format(previous_time);
+            String currentTime = hourPrinter.format(previous_time);
+            currentTime = currentTime.replaceAll("AM","am").replaceAll("PM", "pm");
             hours.add(currentTime);
         }
         return  hours;
@@ -82,7 +80,7 @@ public class TimeCalculatorImpl implements  TimeCalculator{
      * @param nextMeeting, String RFC3339 date format
      * @return timeDiff, String time difference
      */
-    public String CalculateTimeDif(String nextMeeting) {
+    public String calculateTimeDiff(String nextMeeting) {
 
         //special case when nextMeeting time is null
         if(nextMeeting.equals("null")) return  "Forever";
@@ -104,11 +102,12 @@ public class TimeCalculatorImpl implements  TimeCalculator{
 
             //manages the hours displaying
             if (diffHours <= 0) hours = "";
-            else if(diffHours>1) hours = String.valueOf(diffHours) + " hours and ";
-            else  hours = String.valueOf(diffHours) + " hour and ";
+            else if(diffHours>1) hours = String.valueOf(diffHours) + " hours ";
+            else  hours = String.valueOf(diffHours) + " hour ";
 
             //manages the minutes displaying
             if(diffMinutes == 0) minutes = "";
+            else if (diffHours > 0) minutes = "and " + String.valueOf(diffMinutes) + " minutes";
             else minutes = String.valueOf(diffMinutes) + " minutes";
 
             //if both hour and minutes difference is 0, return 0 minutes
@@ -209,5 +208,52 @@ public class TimeCalculatorImpl implements  TimeCalculator{
 
         return duration;
     }
+
+
+    /**
+     * this method calculates and returns the time difference between
+     * the startTime of the next meeting and the current time
+     * @param startTime, meeting start time in RFC3339 format
+     * @return difference, int time difference
+     */
+    public int getTimeDiffByCurrentTime(String startTime)
+    {
+        int difference = 0;
+        try
+        {
+            Date meeting = datetimeParser.parse(startTime);
+            Date date = new Date();
+
+            int hourDiff = meeting.getHours() - date.getHours();
+            int minDiff = meeting.getMinutes();
+            //if the start meeting time is less than the current time
+            //then return -1 so it would not showing in the time table
+            //if(hourDiff < -1) return  -1;
+
+            //otherwise calculates the time difference based on minutes
+            hourDiff *= 60;
+            difference = minDiff+ hourDiff;
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return difference;
+    }
+
+    public String parseRFCDateToRegular(String RFCTime)
+    {
+        String time = "";
+        try {
+            Date date = datetimeParser.parse(RFCTime);
+            time = timePrinter.format(date);
+            time = time.replaceAll("AM","am").replaceAll("PM", "pm");
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return time;
+    }
+
 
 }

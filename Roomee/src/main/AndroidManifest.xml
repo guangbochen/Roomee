@@ -15,7 +15,8 @@
         android:theme="@style/AppBaseTheme" >
         <activity
             android:name="com.vivant.roomee.MainActivity"
-            android:label="@string/welcome" >
+            android:label="@string/welcome"
+            android:screenOrientation="sensorLandscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -26,12 +27,14 @@
         <activity
             android:name="com.vivant.roomee.RoomListActivity"
             android:configChanges="orientation|screenSize"
+            android:screenOrientation="sensorLandscape"
             android:label="@string/title_activity_room_list" >
         </activity>
 
         <!-- defines roomDetails activity to take fullscreen -->
         <activity
             android:name="com.vivant.roomee.RoomDetailsActivity"
+            android:screenOrientation="sensorLandscape"
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_room_details"
             android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen">
@@ -39,6 +42,7 @@
 
         <activity
             android:name=".AddMeetingActivity"
+            android:screenOrientation="sensorLandscape"
             android:configChanges="orientation|screenSize"
             android:label="New Meeting" />
 

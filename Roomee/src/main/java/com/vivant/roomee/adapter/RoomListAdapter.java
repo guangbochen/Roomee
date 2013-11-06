@@ -105,7 +105,7 @@ public class RoomListAdapter extends BaseAdapter {
 
         //calculate the time diff via timeCalculator class
         tc = new TimeCalculatorImpl();
-        String timeDiff = tc.CalculateTimeDif(room.getTime());
+        String timeDiff = tc.calculateTimeDiff(room.getTime());
         holder.txtTime.setText(timeDiff);
     }
 

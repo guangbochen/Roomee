@@ -11,9 +11,11 @@ public interface TimeCalculator {
 
     public String getCurrentTime();
     public ArrayList<String> getCurrentAndNextHours();
-    public String CalculateTimeDif(String nextMeeting);
+    public String calculateTimeDiff(String nextMeeting);
     public boolean compareMeetingTime(String meetingStart, String meetingEnd, String startTime, String endTime);
     public String getRFCDateFormat(int hour, int mins);
     public int calculatesDuration(String startTime, String endTime);
     public Date getRegularDateFormat(String RFCTime);
+    public int getTimeDiffByCurrentTime(String startTime);
+    public String parseRFCDateToRegular(String RFCTime);
 }

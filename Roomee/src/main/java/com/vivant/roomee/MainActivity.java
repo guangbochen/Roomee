@@ -22,16 +22,15 @@ import org.json.JSONObject;
 
 
 /**
- * this activity class manages login actions
- * it validates user via api keys through Roomee web service
+ * this activity manages user login activity,
+ * it validates user via the api keys it entered
  */
 public class MainActivity extends Activity {
 
     private EditText txtAPIKey;
 
-
     /**
-     * onCreate methods initialize the view once activity is created
+     * onCreate methods initialize the view once the activity is created
      */
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

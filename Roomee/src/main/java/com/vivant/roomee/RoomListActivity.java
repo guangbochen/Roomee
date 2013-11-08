@@ -33,7 +33,6 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
     private ListView roomListView;
     private List<Room> roomList = new ArrayList<Room>();
     private String token;
-//    private ProgressDialog dialog;
 
     /**
      * onCreate method initialise the view of RoomListActivity

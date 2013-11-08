@@ -11,6 +11,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import com.vivant.roomee.R;
+import com.vivant.roomee.model.Constants;
 import com.vivant.roomee.model.Meeting;
 import com.vivant.roomee.timeManager.TimeCalculator;
 import com.vivant.roomee.timeManager.TimeCalculatorImpl;
@@ -27,12 +28,13 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
  */
 public class MeetingTableHandler {
 
+    private final static int HOUR = 60;
+    private final static int timeRange = 12;
     private LinearLayout meetingTableHeader;
     private RelativeLayout meetingTimeTable;
     private Context context;
     private TimeCalculator tc;
     private static ArrayList<String> hours;
-    private final static int HOUR = 60;
     private LinearLayout meetingTimelineHeader;
     private LinearLayout meetingTimelineFooter;
 
@@ -52,6 +54,9 @@ public class MeetingTableHandler {
         tc = new TimeCalculatorImpl();
     }
 
+    /**
+     * this method add a list of time line to the top of meeting table
+     */
     public void setMeetingTableHeader() {
 
         meetingTableHeader.removeAllViews();
@@ -59,7 +64,7 @@ public class MeetingTableHandler {
         hours = new ArrayList<String>();
         hours = tc.getCurrentAndNextHours();
         int index  =0;
-        for(int i=0; i<12; i++)
+        for(int i=0; i<timeRange; i++)
         {
             TextView label_time = new TextView(context);
             label_time.setTextColor(Color.WHITE);
@@ -79,10 +84,10 @@ public class MeetingTableHandler {
                         LinearLayout.LayoutParams.MATCH_PARENT, 1f));
                 if(i==11)
                 {
+                    //if is the last hour set position to the right side
                     LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                             LinearLayout.LayoutParams.MATCH_PARENT, 1f);
                     lp.setMargins(0,0,0,0);
-                    //get last hour element
                     label_time.setText(hours.get(6));
                     label_time.setGravity(Gravity.RIGHT);
                     label_time.setLayoutParams(lp);
@@ -123,16 +128,14 @@ public class MeetingTableHandler {
 
         //calculates the start position of the meeting
         int timeDiff = tc.getTimeDiffByCurrentTime(m.getStart());
-        Log.d("TEST", String.valueOf(timeDiff));
-
         int padding = ((timeDiff*100)/HOUR)*hourWidth/100;
-        Log.d("TEST padding left = ", String.valueOf(padding));
+
         //add meeting view to the meeting time table
         TextView meeting = new TextView(context);
         //set layout parameters for each meeting
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.MATCH_PARENT);
-        lp.setMarginStart(padding);
+        lp.setMargins(padding, 15, 0, 15);
         meeting.setLayoutParams(lp);
 
         //set meeting component details
@@ -167,36 +170,76 @@ public class MeetingTableHandler {
     }
 
 
-    public void setMeetingTimeLineHeader()
+    /**
+     * this method add meeting time line header
+     * @param status, int room status
+     */
+    public void setMeetingTimeLineHeader(int status)
     {
         meetingTimelineHeader.removeAllViews();
-        for(int i=0; i<12; i++)
+        for(int i=0; i<timeRange; i++)
         {
             TextView time = new TextView(context);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.MATCH_PARENT, 1f);
             //if is first item, set padding to the left side
             time.setLayoutParams(lp);
-            time.setBackgroundResource(R.drawable.timelines);
+            //check the room status and set the timeLine's background
+            if(status == 1) time.setBackgroundResource(R.drawable.busy_timeline_header);
+            else time.setBackgroundResource(R.drawable.free_timeline_header);
             //add time zone
             meetingTimelineHeader.addView(time);
         }
     }
 
-    public void setMeetingTimeLineFooter()
+    /**
+     * this method add meeting time line footer
+     * @param status, int room status
+     */
+    public void setMeetingTimeLineFooter(int status)
     {
         meetingTimelineFooter.removeAllViews();
-        for(int i=0; i<12; i++)
+        for(int i=0; i<timeRange; i++)
         {
             TextView time = new TextView(context);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.MATCH_PARENT, 1f);
             //if is first item, set padding to the left side
             time.setLayoutParams(lp);
-            time.setBackgroundResource(R.drawable.busy_timeline_footer);
+            //check the room status and set the timeLine's background
+            if(status == 1) time.setBackgroundResource(R.drawable.busy_timeline_footer);
+            else time.setBackgroundResource(R.drawable.free_timeline_footer);
             //add time zone
             meetingTimelineFooter.addView(time);
         }
+    }
+
+
+    /**
+     * this method add minutes hand to the meeting time table
+     * @param clockHand, clock hand in minutes
+     */
+    public void setClockMinutesHand(TextView clockHand)
+    {
+        meetingTimeTable.removeView(clockHand);
+        int totalHours = 6;
+        int tableWidth = meetingTimeTable.getWidth();
+        int hourWidth = tableWidth / totalHours;
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.FILL_PARENT);
+        //get the clock minutes hand location via calculating the current time
+        Date date = new Date();
+        int mins = date.getMinutes();
+        int padding = ((mins*100)/HOUR)*hourWidth/100;
+        lp.setMargins(padding,0,0,0);
+
+        clockHand.setLayoutParams(lp);
+        clockHand.setWidth(1);
+        int tableHeight = meetingTimeTable.getHeight();
+        clockHand.setBackgroundResource(R.color.white);
+
+        //add clock minutes hand to the view
+        meetingTimeTable.addView(clockHand);
     }
 
 }

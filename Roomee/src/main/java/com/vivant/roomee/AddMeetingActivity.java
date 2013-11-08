@@ -50,7 +50,7 @@ public class AddMeetingActivity extends Activity {
     private JSONParser jsonParser;
 
 
-    //required data for add new meeting
+    //instances for add new meeting
     private static String token;
     private static String roomId;
     private static String summary;
@@ -69,7 +69,7 @@ public class AddMeetingActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_add_meeting);
 
-        //set custom title for the main activity
+        //set custom title for the action bar
         ActionBar ab = getActionBar();
         ab.setTitle("Add new meeting");
         ab.setDisplayShowTitleEnabled(true);
@@ -77,7 +77,7 @@ public class AddMeetingActivity extends Activity {
         //find all the view contents
         findContentView();
 
-        //retrieve data passed from main activity
+        //retrieve data passed from RoomDetailsActivity
         Bundle extras = getIntent().getExtras();
         if(extras != null)
         {
@@ -155,13 +155,13 @@ public class AddMeetingActivity extends Activity {
         //validate start meeting time
         if((sHour < hour) || (sHour == hour && sMin<min))
         {
-            String message = "Meeting start time should be greater than the current time ("+tc.getCurrentTime() +")";
+            String message = "Meeting start time should be greater or equal to the current time ("+tc.getCurrentTime() +")";
             invalidMessage(message);
             return false;
         }
         else
         {
-            //check there should be no meeting between selected time
+            //check whether there is a meeting between selected time
             for(Meeting m : meetingList)
             {
                 String sMeeting = m.getStart();
@@ -182,8 +182,6 @@ public class AddMeetingActivity extends Activity {
             //converting regular meeting time to RFC3339 format
             startTime =  tc.getRFCDateFormat(sHour, sMin);
             endTime =  tc.getRFCDateFormat(eHour, eMin);
-            Log.d("Test", startTime);
-            Log.d("Test", endTime);
         }
 
         return true;
@@ -305,12 +303,7 @@ public class AddMeetingActivity extends Activity {
                 if(json != null)
                 {
                     String HttpStatus = json.getString(Constants.TAG_STATUS);
-                    if(HttpStatus.equals("success"))
-                    {
-//                        JSONObject data = json.getJSONObject(Constants.TAG_DATA);
-//                        token = data.getString(Constants.TAG_OAUTH);
-                        done = true;
-                    }
+                    if(HttpStatus.equals("success")) done = true;
                 }
             }
             catch (Exception e) {

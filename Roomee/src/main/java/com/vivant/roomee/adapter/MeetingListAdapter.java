@@ -6,29 +6,38 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 import com.vivant.roomee.R;
 import com.vivant.roomee.model.Meeting;
+import com.vivant.roomee.timeManager.TimeCalculator;
+import com.vivant.roomee.timeManager.TimeCalculatorImpl;
+
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
+ * This class add a list of meeting to the searching meeting drawer
  * Created by guangbo on 8/11/13.
  */
 public class MeetingListAdapter extends BaseAdapter {
     private ArrayList<Meeting> meetings;
     private Context context;
+    private TimeCalculator tc;
 
     public MeetingListAdapter(Context context, ArrayList<Meeting> meetings) {
         this.context = context;
         this.meetings = meetings;
-
     }
 
     /**
      * viewHolder for row items in roomList
      */
     private class ViewHolder {
-        TextView txtMeeting;
+        ImageView imgStatus;
+        TextView txtCreator;
+        TextView txtSummary;
+        TextView txtTime;
     }
 
     @Override
@@ -40,7 +49,10 @@ public class MeetingListAdapter extends BaseAdapter {
         {
             view = mInflater.inflate(R.layout.drawer_meeting_item , null);
             holder  = new ViewHolder();
-            holder.txtMeeting = (TextView) view.findViewById(R.id.drawer_meeting);
+            holder.imgStatus = (ImageView) view.findViewById(R.id.drawer_mStatus);
+            holder.txtCreator = (TextView) view.findViewById(R.id.drawer_mCreator);
+            holder.txtSummary = (TextView) view.findViewById(R.id.drawer_mSummary);
+            holder.txtTime = (TextView) view.findViewById(R.id.drawer_mTime);
             view.setTag(holder);
         }
         else
@@ -48,14 +60,38 @@ public class MeetingListAdapter extends BaseAdapter {
             holder = (ViewHolder) view.getTag();
         }
 
+        //set view to the view component
         Meeting m = getItem(position);
-
-        //set view to the screen
-        holder.txtMeeting.setText(m.getSummary());
-        holder.txtMeeting.setTextSize(18);
+        setViewHolder(holder,m);
 
         return view;
     }
+
+    /**
+     * this method set view details of each ViewHolder
+     * @param holder
+     * @param m
+     */
+    private void setViewHolder(ViewHolder holder,Meeting m)
+    {
+        //initialise time calculator instance
+        tc = new TimeCalculatorImpl();
+
+        if(tc.checkRoomStatus(m.getStart(), m.getEnd()) == 0)
+            holder.imgStatus.setImageResource(R.color.danger);
+        else if(tc.checkRoomStatus(m.getStart(), m.getEnd()) < 0)
+            holder.imgStatus.setImageResource(R.color.success);
+        else
+            holder.imgStatus.setImageResource(R.color.finished);
+
+        //set view to the screen
+        holder.txtCreator.setText(m.getCreator());
+        holder.txtSummary.setText(m.getSummary());
+        String startTime = tc.parseRFCDateToRegular(m.getStart());
+        String endTime = tc.parseRFCDateToRegular(m.getEnd());
+        holder.txtTime.setText("From " + startTime + " to " + endTime);
+    }
+
 
     /**
      * this method returns total count of list items

@@ -1,16 +1,56 @@
-<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_gravity="center"
-    android:gravity="center"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    <ImageView
+        android:id="@+id/drawer_mStatus"
+        android:layout_height="90sp"
+        android:layout_width="20sp" />
 
     <TextView
-        android:id="@+id/drawer_meeting"
-        android:padding="15sp"
+        android:id="@+id/drawer_mCreator"
+        android:textColor="@color/finished"
+        android:layout_toRightOf="@+id/drawer_mStatus"
+        android:paddingTop="3sp"
+        android:paddingLeft="10sp"
+        android:textSize="12sp"
+        android:fontFamily="sans-serif"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content" />
 
-</LinearLayout>
+    <TextView
+        android:id="@+id/drawer_mSummary"
+        android:layout_toRightOf="@+id/drawer_mStatus"
+        android:layout_below="@+id/drawer_mCreator"
+        android:paddingTop="3sp"
+        android:paddingLeft="10sp"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:fontFamily="sans-serif"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content" />
+
+    <LinearLayout
+        android:layout_toRightOf="@+id/drawer_mStatus"
+        android:layout_below="@+id/drawer_mSummary"
+        android:paddingTop="2sp"
+        android:paddingLeft="6sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ic_drawer_time" />
+
+        <TextView
+            android:id="@+id/drawer_mTime"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content" />
+    </LinearLayout>
+</RelativeLayout>

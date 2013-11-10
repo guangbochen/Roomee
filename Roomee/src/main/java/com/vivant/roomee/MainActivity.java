@@ -4,7 +4,6 @@ import android.app.ActionBar;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
@@ -22,15 +21,16 @@ import org.json.JSONObject;
 
 
 /**
- * this activity manages user login activity,
- * it validates user via the api keys it entered
+ * this class manages user login activity
+ * and validates API key via the Roomee web services
  */
 public class MainActivity extends Activity {
 
     private EditText txtAPIKey;
+    private final static String title = "Welcome to Roomee";
 
     /**
-     * onCreate methods initialize the view once the activity is created
+     * onCreate method initialises the view of main activity
      */
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,31 +40,30 @@ public class MainActivity extends Activity {
 
         //set custom title for the main activity
         ActionBar ab = getActionBar();
-        ab.setTitle("Welcome to Roomee");
+        ab.setTitle(title);
         ab.setDisplayShowTitleEnabled(true);
 
     }
 
     /**
      * this method handles loginButton onclick event
-     * it validate the user with api key through Roomee web service
+     * it validate the API key through Roomee web service
      */
     public void loginButtonOnClick(View view) {
         txtAPIKey = (EditText) findViewById(R.id.txtAPIKey);
         try
         {
             String apiKey = txtAPIKey.getText().toString();
-
             //if is empty displays error message
-            if(apiKey.equals(""))
+            if(apiKey.length() == 0)
             {
-                Toast toast = Toast.makeText(getApplicationContext(), "Empty Authentication Key", Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.CENTER|Gravity.CENTER_HORIZONTAL, 0, 0);
-                toast.show();
+                String message = "Empty API Key";
+                displayErrorMessage(message);
+                txtAPIKey.requestFocus();
             }
             else
             {
-                //login via Roomee web service
+                //validate the API key and login
                 new AuthenticationTask(MainActivity.this, apiKey).execute();
             }
         }
@@ -76,13 +75,12 @@ public class MainActivity extends Activity {
     }
 
     /**
-     * this is private AuthenticationTask class that validates user
-     * whoever request to access the Roomee web service
+     * this is private AuthenticationTask class that validates the API key
+     * whoever request to access the Roomee web services
      */
     private class AuthenticationTask extends AsyncTask<String, Void, Boolean> {
 
         private ProgressDialog dialog;
-        private Activity activity;
         private Context context;
         private Boolean done;
         private String message;
@@ -93,25 +91,24 @@ public class MainActivity extends Activity {
          * AuthenticationTask constructor
          */
         public AuthenticationTask(Activity activity, String key) {
-            this.activity = activity;
             context = activity;
             dialog = new ProgressDialog(context);
             this.apiKey = key;
         }
 
         /**
-         * onPreExecute initalise AuthenticationTask before it starts
+         * onPreExecute initialises AuthenticationTask before it starts
          */
         protected void onPreExecute() {
             this.message = "No internet connection";
-            this.dialog.setMessage("Validating authentication key...");
+            this.dialog.setMessage("Validating API key...");
             this.dialog.setCanceledOnTouchOutside(false);
             this.dialog.setCancelable(false);
             this.dialog.show();
         }
 
         /**
-         * doInBackground method validates user key in the background
+         * doInBackground method validates user API key in the background
          * via communicating with Roomee web service server
          * and parse the json data that is returned by the server
          */
@@ -126,7 +123,6 @@ public class MainActivity extends Activity {
                 //getting json data from url
                 String url = "auth?api_key=" + apiKey;
                 JSONObject json = jsonParser.getJSONFromUrl(url);
-
                 if(json != null)
                 {
                     String HttpStatus = json.getString(Constants.TAG_STATUS);
@@ -157,13 +153,10 @@ public class MainActivity extends Activity {
             //dismiss the loading dialog
             if(dialog.isShowing()) dialog.dismiss();
 
-            //if is not valid user display message from server
+            //if is not valid API key displays server validation message
             if(done == false)
             {
-                //display invalid token Toast message
-                Toast toast = Toast.makeText(context, message, Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER|Gravity.CENTER_HORIZONTAL, 0, 0);
-                toast.show();
+                displayErrorMessage(message);
             }
             else {
                 //if is valid user login and calls roomList activity
@@ -174,11 +167,26 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * this method displays toast message
+     * @param message, string message
+     */
+    private void displayErrorMessage(String message)
+    {
+        Toast toast = Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.CENTER|Gravity.CENTER_HORIZONTAL, 0, 0);
+        toast.show();
+    }
+
+    /**
+     * this method creates the menu bar of the activity
+     * @param menu, Menu
+     * @return false, do not display the menu
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return false;
     }
-    
 }

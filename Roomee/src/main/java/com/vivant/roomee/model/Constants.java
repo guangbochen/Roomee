@@ -1,6 +1,7 @@
 package com.vivant.roomee.model;
 
 /**
+ * This is constant class that contains all the public constant variables
  * Created by guangbo on 24/10/13.
  */
 public class Constants {

@@ -35,6 +35,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * This class manages add new meeting activity
  * Created by guangbo on 28/10/13.
  */
 public class AddMeetingActivity extends Activity {
@@ -48,8 +49,6 @@ public class AddMeetingActivity extends Activity {
     private Room room;
     private ArrayList<Meeting> meetingList = new ArrayList<Meeting>();
     private JSONParser jsonParser;
-
-
     //instances for add new meeting
     private static String token;
     private static String roomId;

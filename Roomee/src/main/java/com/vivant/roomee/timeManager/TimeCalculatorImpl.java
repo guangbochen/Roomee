@@ -1,28 +1,22 @@
 package com.vivant.roomee.timeManager;
 
-import android.provider.ContactsContract;
-import android.util.Log;
-
-import com.vivant.roomee.model.Constants;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 /**
- * This class calculates the time difference between current time and next meeting time
+ * This class manges time calculation methods and parse or format time into RFC3339 format
  * Created by guangbo on 28/10/13.
  */
 public class TimeCalculatorImpl implements  TimeCalculator{
 
     private static SimpleDateFormat datetimeParser = null;
-    private static SimpleDateFormat timePrinter = null;
     private static SimpleDateFormat datePrinter = null;
-    private static SimpleDateFormat hourPrinter = null;
+    private static SimpleDateFormat timePrinter = null;
     private static SimpleDateFormat hourMinPrinter = null;
+    private static SimpleDateFormat hourPrinter = null;
     private final static int SECONDS = 1000;
     private final static int MINUTES = 60;
     private final static int HOURS = 24;
@@ -37,8 +31,8 @@ public class TimeCalculatorImpl implements  TimeCalculator{
         if(datetimeParser==null) {datetimeParser = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");};
         if(datePrinter==null) {datePrinter = new SimpleDateFormat("yyyy-MM-dd");};
         if(timePrinter==null) {timePrinter = new SimpleDateFormat("hh:mm aa");};
-        if(hourPrinter==null) {hourPrinter = new SimpleDateFormat("hh aa");};
         if(hourMinPrinter==null) {hourMinPrinter = new SimpleDateFormat("hh:mm");};
+        if(hourPrinter==null) {hourPrinter = new SimpleDateFormat("hh aa");};
     }
 
     /**
@@ -53,24 +47,22 @@ public class TimeCalculatorImpl implements  TimeCalculator{
     }
 
     /**
-     * this method returns a list of time upon the current time
-     * @return hours, ArrayList of String for the current and next 6 hours time
+     * this method returns a list of time for the next 6 hours upon the current time
+     * @return hours, ArrayList of String of time
      */
+    @Override
     public ArrayList<String> getCurrentAndNextHours() {
 
         hours = new ArrayList<String>();
-        Date previous_time = new Date();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(previous_time);
+        Date date = new Date();
 
+        //add a list of time for the next 6 hours
         for(int i=0; i<7; i++)
         {
-            if(i==0) calendar.add(Calendar.HOUR, 0);
-            else  calendar.add(Calendar.HOUR, 1);
-            previous_time = calendar.getTime();
-            String currentTime = hourPrinter.format(previous_time);
-            currentTime = currentTime.replaceAll("AM","am").replaceAll("PM", "pm");
-            hours.add(currentTime);
+            if(i!=0) date.setHours(date.getHours()+1);
+            String time = hourPrinter.format(date);
+            time = time.replaceAll("AM","am").replaceAll("PM", "pm");
+            hours.add(time);
         }
         return  hours;
     }
@@ -80,26 +72,23 @@ public class TimeCalculatorImpl implements  TimeCalculator{
      * @param nextMeeting, String RFC3339 date format
      * @return timeDiff, String time difference
      */
+    @Override
     public String calculateTimeDiff(String nextMeeting) {
 
         //special case when nextMeeting time is null
         if(nextMeeting.equals("null")) return  "Forever";
 
         try {
-            //get current date time
+            //get current date time and next meeting date
             Date current = new Date();
-
-            //get next meeting date
-            Date next    = datetimeParser.parse(nextMeeting);
+            Date next = datetimeParser.parse(nextMeeting);
 
             //calculate the time diff
             long diff = next.getTime() - current.getTime();
-            //long diffSeconds = diff / SECONDS % MINUTES;
             long diffMinutes = diff / (MINUTES * SECONDS) % MINUTES;
             long diffHours = diff / (MINUTES * MINUTES * SECONDS) % HOURS;
 
             String hours , minutes;
-
             //manages the hours displaying
             if (diffHours <= 0) hours = "";
             else if(diffHours>1) hours = String.valueOf(diffHours) + " hours ";
@@ -111,7 +100,7 @@ public class TimeCalculatorImpl implements  TimeCalculator{
             else minutes = String.valueOf(diffMinutes) + " minutes";
 
             //if both hour and minutes difference is 0, return 0 minutes
-            if(hours.length() == 0 && minutes.length() ==0) return " 0 minutes";
+            if(hours.length() == 0 && minutes.length() ==0) return " less than 1 minutes";
             return hours + minutes;
 
         }
@@ -128,8 +117,9 @@ public class TimeCalculatorImpl implements  TimeCalculator{
      * @param meetingEnd, existing meeting end time
      * @param startTime, new added meeting start time
      * @param endTime, new added meeting end time
-     * @return true, if there is no existing meeting during the new meeting time
+     * @return false, if there is no existing meeting during the new meeting time
      */
+    @Override
     public boolean compareMeetingTime(String meetingStart, String meetingEnd, String startTime, String endTime)
     {
         try
@@ -152,43 +142,13 @@ public class TimeCalculatorImpl implements  TimeCalculator{
         return false;
     }
 
-
-    /**
-     * this method returns date and time in RFC3339 format
-     * @param hour, selected meeting hour
-     * @param mins, selected meeting minutes
-     * @return time, String time in RFC3339 format
-     */
-    public String getRFCDateFormat(int hour, int mins)
-    {
-        Date date = new Date();
-        date.setHours(hour);
-        date.setMinutes(mins);
-        String time = datetimeParser.format(date);
-        return time;
-    }
-
-    public Date getRegularDateFormat(String RFCTime)
-    {
-        Date date = new Date();
-        try
-        {
-            date = datetimeParser.parse(RFCTime);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return date;
-    }
-
     /**
      * this method calculates meeting duration in minutes
      * @param startTime, String start meeting time
      * @param endTime, String end meeting time
      * @return duration, int meeting duration in minutes
      */
+    @Override
     public int calculatesDuration(String startTime, String endTime)
     {
         int duration =0;
@@ -216,6 +176,7 @@ public class TimeCalculatorImpl implements  TimeCalculator{
      * @param startTime, meeting start time in RFC3339 format
      * @return difference, int time difference
      */
+    @Override
     public int getTimeDiffByCurrentTime(String startTime)
     {
         int difference = 0;
@@ -226,11 +187,8 @@ public class TimeCalculatorImpl implements  TimeCalculator{
 
             int hourDiff = meeting.getHours() - date.getHours();
             int minDiff = meeting.getMinutes();
-            //if the start meeting time is less than the current time
-            //then return -1 so it would not showing in the time table
-            //if(hourDiff < -1) return  -1;
 
-            //otherwise calculates the time difference based on minutes
+            //calculates the time difference based on minutes
             hourDiff *= 60;
             difference = minDiff+ hourDiff;
 
@@ -241,6 +199,50 @@ public class TimeCalculatorImpl implements  TimeCalculator{
         return difference;
     }
 
+    /**
+     * this method check the meeting status of whether it is finished ,processing or finished
+     * @param startTime,String meeting start time in RFC3339 format
+     * @param endTime, String meeting end time (RFC3339)
+     * @return 0, if is in processing
+     */
+    @Override
+    public int checkRoomStatus(String startTime, String endTime) {
+        try {
+            Date date = new Date();
+            //get the existing start meeting time
+            Date sTime = datetimeParser.parse(startTime);
+            //get the existing end meeting time
+            Date eTime = datetimeParser.parse(endTime);
+            if(sTime.compareTo(date) > 0) return -1;
+            if(eTime.compareTo(date) < 0) return 1;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /**
+     * this method returns date and time in RFC3339 format
+     * @param hour, selected meeting hour
+     * @param mins, selected meeting minutes
+     * @return time, String time in RFC3339 format
+     */
+    @Override
+    public String getRFCDateFormat(int hour, int mins)
+    {
+        Date date = new Date();
+        date.setHours(hour);
+        date.setMinutes(mins);
+        String time = datetimeParser.format(date);
+        return time;
+    }
+
+    /**
+     * this method parse RFC Date format into regular date time
+     * @param RFCTime, String RFCTIME in RFC3339 date format
+     * @return time , String time in timePrinter format
+     */
+    @Override
     public String parseRFCDateToRegular(String RFCTime)
     {
         String time = "";
@@ -254,6 +256,5 @@ public class TimeCalculatorImpl implements  TimeCalculator{
 
         return time;
     }
-
 
 }

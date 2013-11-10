@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
@@ -41,6 +42,7 @@ public class RoomDetailsActivity extends Activity {
     private TimeCalculator tc;
     private ProgressDialog dialog;
     //view components for meeting details
+    private LinearLayout meetingDetailsLayout;
     private LinearLayout headerLinerLayout;
     private LinearLayout roomInfoLinerLayout;
     private LinearLayout timeInfoLinerLayout;
@@ -58,6 +60,7 @@ public class RoomDetailsActivity extends Activity {
     private LinearLayout meetingTimelineHeader;
     private LinearLayout meetingTimelineFooter;
     private ListView meetingListView;
+    private LinearLayout meetingListDrawerLayout;
     private MeetingListDrawer mlDrawer;
 
     @Override
@@ -76,7 +79,7 @@ public class RoomDetailsActivity extends Activity {
         if(extras != null)
         {
             //initialise meeting list drawer
-            mlDrawer = new MeetingListDrawerImpl(RoomDetailsActivity.this, meetingListView);
+            mlDrawer = new MeetingListDrawerImpl(RoomDetailsActivity.this, meetingListDrawerLayout);
 
             int id = extras.getInt("id");
             roomId = String.valueOf(id);
@@ -287,7 +290,11 @@ public class RoomDetailsActivity extends Activity {
 
     private void getViewComponents()
     {
-        //get layout component
+        //find parent layout
+        meetingDetailsDrawerLayout = (DrawerLayout) findViewById(R.id.meeting_details_drawer_layout);
+
+        //find children layout
+        meetingDetailsLayout = (LinearLayout) findViewById(R.id.meeting_details_layout);
         headerLinerLayout = (LinearLayout) findViewById(R.id.header);
         roomInfoLinerLayout = (LinearLayout) findViewById(R.id.roomInfo);
         timeInfoLinerLayout = (LinearLayout) findViewById(R.id.timeInfo);
@@ -297,7 +304,7 @@ public class RoomDetailsActivity extends Activity {
         meetingTimelineHeader = (LinearLayout) findViewById(R.id.meetingTimeLineHeader);
         meetingTimelineFooter = (LinearLayout) findViewById(R.id.meetingTimeLineFooter);
 
-        //get each view component
+        //get individual view component
         txtRoomName = (TextView) findViewById(R.id.txtRoomName);
         txtStatus = (TextView) findViewById(R.id.txtStatus);
         txtTime = (TextView) findViewById(R.id.txtTime);
@@ -306,7 +313,7 @@ public class RoomDetailsActivity extends Activity {
         timeMinutesHand = (TextView) findViewById(R.id.timeMinutesHand);
 
         //get drawer layout
-        meetingDetailsDrawerLayout = (DrawerLayout) findViewById(R.id.meeting_details_drawer_layout);
+        meetingListDrawerLayout = (LinearLayout) findViewById(R.id.meetingListDrawerLayout);
         meetingListView = (ListView) findViewById(R.id.meetingListDrawer);
     }
 
@@ -331,6 +338,13 @@ public class RoomDetailsActivity extends Activity {
      */
     public void searchMeetingOnClick(View view)
     {
+//        if(!meetingDetailsDrawerLayout.isDrawerOpen(Gravity.LEFT))
+//        {
+//            Log.d("TEST", "open");
+//            meetingDetailsDrawerLayout.openDrawer(Gravity.LEFT);
+//            meetingDetailsLayout.setPadding(250,0,-250,0);
+//        }
+//        meetingDetailsLayout.setPadding(-250,0,250,0);
         meetingDetailsDrawerLayout.openDrawer(Gravity.LEFT);
     }
 
@@ -349,6 +363,5 @@ public class RoomDetailsActivity extends Activity {
         super.onResume();
         new ProgressRoomDetails(RoomDetailsActivity.this).execute();
     }
-
 
 }

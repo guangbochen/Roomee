@@ -19,7 +19,6 @@ public class MeetingListDrawerImpl implements MeetingListDrawer {
     private LinearLayout meetingListDrawerLayout;
     private ListView meetingListView;
     private MeetingListAdapter adapter;
-    private final static String hint = "slide to close <";
 
     public MeetingListDrawerImpl(Context context, LinearLayout meetingListDrawerLayout) {
         this.context = context;
@@ -35,14 +34,5 @@ public class MeetingListDrawerImpl implements MeetingListDrawer {
     public void addMeetingList(ArrayList<Meeting> meetings) {
         adapter = new MeetingListAdapter(context,meetings);
         meetingListView.setAdapter(adapter);
-        setView();
     }
-
-    private void setView()
-    {
-        //set details of meeting drawer hint
-//        meetingDrawerHint.setTextSize(14);
-//        meetingDrawerHint.setText(hint);
-    }
-
 }

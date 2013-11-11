@@ -43,6 +43,7 @@ public class TimeCalculatorImpl implements  TimeCalculator{
 
         Date dt = new Date();
         String currentTime = timePrinter.format(dt);
+        currentTime = currentTime.replaceAll("AM","am").replaceAll("PM", "pm");
         return  currentTime;
     }
 
@@ -62,6 +63,7 @@ public class TimeCalculatorImpl implements  TimeCalculator{
             if(i!=0) date.setHours(date.getHours()+1);
             String time = hourPrinter.format(date);
             time = time.replaceAll("AM","am").replaceAll("PM", "pm");
+            if(date.getHours()!= 10 && date.getHours()!= 22 ) time = time.replaceAll("0","");
             hours.add(time);
         }
         return  hours;
@@ -100,7 +102,7 @@ public class TimeCalculatorImpl implements  TimeCalculator{
             else minutes = String.valueOf(diffMinutes) + " minutes";
 
             //if both hour and minutes difference is 0, return 0 minutes
-            if(hours.length() == 0 && minutes.length() ==0) return " less than 1 minutes";
+            if(diffHours == 0 && diffMinutes==0 ) return " less than 1 minute";
             return hours + minutes;
 
         }

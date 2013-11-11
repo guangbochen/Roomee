@@ -46,6 +46,8 @@
             android:configChanges="orientation|screenSize"
             android:label="New Meeting" />
 
+        <service android:name=".services.RefreshRoomService"></service>
+
     </application>
 
 </manifest>

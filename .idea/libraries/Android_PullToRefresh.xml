@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Android-PullToRefresh">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/Roomee/libs/Android-PullToRefresh" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

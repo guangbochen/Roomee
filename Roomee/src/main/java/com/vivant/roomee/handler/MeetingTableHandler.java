@@ -1,7 +1,11 @@
 package com.vivant.roomee.handler;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -135,7 +139,7 @@ public class MeetingTableHandler {
         //set layout parameters for each meeting
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.MATCH_PARENT);
-        lp.setMargins(padding, 15, 0, 15);
+        lp.setMargins(padding, 20, 0, 20);
         meeting.setLayoutParams(lp);
 
         //set meeting component details
@@ -166,6 +170,7 @@ public class MeetingTableHandler {
         }
 
         //add view to the time table
+        meeting.bringToFront();
         meetingTimeTable.addView(meeting);
     }
 
@@ -227,16 +232,14 @@ public class MeetingTableHandler {
         int hourWidth = tableWidth / totalHours;
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.FILL_PARENT);
+        lp.addRule(RelativeLayout.BELOW);
         //get the clock minutes hand location via calculating the current time
         Date date = new Date();
         int mins = date.getMinutes();
         int padding = ((mins*100)/HOUR)*hourWidth/100;
         lp.setMargins(padding,0,0,0);
-
         clockHand.setLayoutParams(lp);
-        clockHand.setWidth(1);
-        int tableHeight = meetingTimeTable.getHeight();
-        clockHand.setBackgroundResource(R.color.white);
+        clockHand.invalidate();
 
         //add clock minutes hand to the view
         meetingTimeTable.addView(clockHand);

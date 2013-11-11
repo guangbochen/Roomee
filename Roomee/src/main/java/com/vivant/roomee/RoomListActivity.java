@@ -30,9 +30,9 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
 
     private boolean done;
     private JSONParser jsonParser;
-    private ListView roomListView;
     private List<Room> roomList = new ArrayList<Room>();
     private String token;
+    private ListView roomListView;
 
     /**
      * onCreate method initialise the view of RoomListActivity
@@ -109,7 +109,6 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
 
             //add token to the url
             String url = "rooms?oauth_token=" +token;
-//            String url = "http://www.json-generator.com/j/bTwZCVTxiW?indent=4";
             try{
                 JSONObject json = jsonParser.getJSONFromUrl(url);
                 String HttpStatus = json.getString(Constants.TAG_STATUS);

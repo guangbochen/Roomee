@@ -1,8 +1,9 @@
 package com.vivant.roomee;
-
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
@@ -13,7 +14,6 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.vivant.roomee.handler.MeetingTableHandler;
@@ -24,6 +24,7 @@ import com.vivant.roomee.model.Meeting;
 import com.vivant.roomee.model.Room;
 import com.vivant.roomee.navigationDrawer.MeetingListDrawer;
 import com.vivant.roomee.navigationDrawer.MeetingListDrawerImpl;
+import com.vivant.roomee.services.RefreshRoomService;
 import com.vivant.roomee.timeManager.TimeCalculator;
 import com.vivant.roomee.timeManager.TimeCalculatorImpl;
 import org.json.JSONArray;
@@ -59,9 +60,10 @@ public class RoomDetailsActivity extends Activity {
     private RelativeLayout meetingTimeTable;
     private LinearLayout meetingTimelineHeader;
     private LinearLayout meetingTimelineFooter;
-    private ListView meetingListView;
     private LinearLayout meetingListDrawerLayout;
     private MeetingListDrawer mlDrawer;
+    private final static String BROADCAST = "com.vivant.roomee.services.broadcast";
+    private final static String AUTOREFRESH = "com.vivant.roomee.services.autoRefresh";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,12 +80,15 @@ public class RoomDetailsActivity extends Activity {
         Bundle extras = getIntent().getExtras();
         if(extras != null)
         {
-            //initialise meeting list drawer
-            mlDrawer = new MeetingListDrawerImpl(RoomDetailsActivity.this, meetingListDrawerLayout);
-
             int id = extras.getInt("id");
             roomId = String.valueOf(id);
             token = extras.getString("token");
+
+            //start the auto refresh room details service
+            startAutoRefreshServices(roomId, token);
+
+            //initialise meeting list drawer
+            mlDrawer = new MeetingListDrawerImpl(RoomDetailsActivity.this, meetingListDrawerLayout);
 
             //call ProgressRoomDetails to synchronise meeting room details with remote server
             dialog = new ProgressDialog(RoomDetailsActivity.this);
@@ -102,7 +107,6 @@ public class RoomDetailsActivity extends Activity {
 
 
     }
-
 
     /**
      * this class implements runnable class and handles current time counting
@@ -232,19 +236,19 @@ public class RoomDetailsActivity extends Activity {
     private void displayMeetingdetails() {
 
         //erase the old views
-        meetingTableHeader.removeAllViews();
         meetingTimeTable.removeAllViews();
+        meetingTableHeader.removeAllViews();
         meetingTimelineHeader.removeAllViews();
         meetingTimelineFooter.removeAllViews();
-        //displays meeting time table
+        //initialise meeting time table handler
         meetingTableHandler = new MeetingTableHandler(RoomDetailsActivity.this, meetingTableHeader,
                 meetingTimeTable, meetingTimelineHeader, meetingTimelineFooter);
+        //set meeting table details
+        meetingTableHandler.addMeetingToTimeTable(meetingList);
+        meetingTableHandler.setClockMinutesHand(timeMinutesHand);
+        meetingTableHandler.setMeetingTableHeader();
         meetingTableHandler.setMeetingTimeLineHeader(room.getStatus());
         meetingTableHandler.setMeetingTimeLineFooter(room.getStatus());
-        meetingTableHandler.setMeetingTableHeader();
-        meetingTableHandler.addMeetingToTimeTable(meetingList);
-        //set clock minute hand in the meeting time table
-        meetingTableHandler.setClockMinutesHand(timeMinutesHand);
     }
 
 
@@ -314,7 +318,6 @@ public class RoomDetailsActivity extends Activity {
 
         //get drawer layout
         meetingListDrawerLayout = (LinearLayout) findViewById(R.id.meetingListDrawerLayout);
-        meetingListView = (ListView) findViewById(R.id.meetingListDrawer);
     }
 
 
@@ -364,4 +367,48 @@ public class RoomDetailsActivity extends Activity {
         new ProgressRoomDetails(RoomDetailsActivity.this).execute();
     }
 
+
+    private void startAutoRefreshServices(String roomId, String token) {
+        Intent serviceIntent = new Intent(RoomDetailsActivity.this, RefreshRoomService.class);
+        serviceIntent.putExtra("roomId", roomId);
+        serviceIntent.putExtra("token", token);
+        startService(serviceIntent);
+    }
+
+    /**
+     * this method is called when the activity interacting with the user
+     */
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        // intent to filter for download complete intent
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(AUTOREFRESH);
+        //register the receiver
+        registerReceiver(autoRefreshReceiver, intentFilter);
+    }
+
+    /**
+     * this class implements the BroadcastReceiver send by the MyService
+     */
+    private BroadcastReceiver autoRefreshReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent)
+        {
+            //if receivers the download complete action it stops the music player
+            if(intent.getAction().equals(AUTOREFRESH))
+            {
+                Log.d(Constants.MAD, "download completed and start auto refresh");
+                meetingList = intent.getParcelableArrayListExtra("meetingList");
+                room = (Room) intent.getSerializableExtra("room");
+                //display meeting list in the left drawer
+                mlDrawer.addMeetingList(meetingList);
+
+                //update the room and meeting timetable details to the view
+                displayItems();
+                displayMeetingdetails();
+            }
+        }
+    };
 }

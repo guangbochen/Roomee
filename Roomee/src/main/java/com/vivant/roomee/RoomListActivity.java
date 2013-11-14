@@ -169,7 +169,7 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Intent intent = new Intent(RoomListActivity.this,RoomDetailsActivity.class);
         Room room = roomList.get(position);
-        intent.putExtra("id", room.getId());
+        intent.putExtra("id", String.valueOf(room.getId()));
         intent.putExtra("token", token);
         startActivity(intent);
     }

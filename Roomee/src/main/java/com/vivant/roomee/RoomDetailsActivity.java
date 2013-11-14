@@ -14,7 +14,6 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.vivant.roomee.handler.MeetingTableHandler;
 import com.vivant.roomee.json.JSONParser;
@@ -37,31 +36,26 @@ public class RoomDetailsActivity extends Activity {
     private static String roomId;
     private static String token;
     private Room room;
-    private ArrayList<Meeting> meetingList = new ArrayList<Meeting>();
-    private JSONParser jsonParser;
+    private ArrayList<Meeting> meetingList;
     private MeetingTableHandler meetingTableHandler;
     private TimeCalculator tc;
     private ProgressDialog dialog;
-    //view components for meeting details
+    private MeetingListDrawer mlDrawer;
+    //layout components for room details
     private LinearLayout meetingDetailsLayout;
     private LinearLayout headerLinerLayout;
     private LinearLayout roomInfoLinerLayout;
     private LinearLayout timeInfoLinerLayout;
     private LinearLayout meetingInfoLinerLayout;
+    private LinearLayout meetingListDrawerLayout;
+    private DrawerLayout meetingDetailsDrawerLayout;
+    //view components for room details
     private TextView txtStatus;
     private TextView txtRoomName;
     private TextView txtTime;
     private Button btnEndMeeting;
     private Button btnExtendMeeting;
-    private TextView timeMinutesHand;
-    private DrawerLayout meetingDetailsDrawerLayout;
-    //view components for meeting table
-    private LinearLayout meetingTableHeader;
-    private RelativeLayout meetingTimeTable;
-    private LinearLayout meetingTimelineHeader;
-    private LinearLayout meetingTimelineFooter;
-    private LinearLayout meetingListDrawerLayout;
-    private MeetingListDrawer mlDrawer;
+    private TextView txtClockLine;
     private final static String BROADCAST = "com.vivant.roomee.services.broadcast";
     private final static String AUTOREFRESH = "com.vivant.roomee.services.autoRefresh";
 
@@ -70,53 +64,55 @@ public class RoomDetailsActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_room_details);
 
-        //initialise timeCalculator instance
+        //initialise instances
         tc = new TimeCalculatorImpl();
+        meetingList = new ArrayList<Meeting>();
 
-        //get every view components in the RoomDetails activity
-        getViewComponents();
+        //find all of the view components in the RoomDetailsActivity
+        findViewComponents();
 
-        //retrieve data passed from main activity
+        //initialise meeting list drawer
+        mlDrawer = new MeetingListDrawerImpl(RoomDetailsActivity.this, meetingListDrawerLayout);
+
+        //retrieve data passed from RoomListActivity
         Bundle extras = getIntent().getExtras();
         if(extras != null)
         {
-            int id = extras.getInt("id");
-            roomId = String.valueOf(id);
+            roomId = extras.getString("id");
             token = extras.getString("token");
 
-            //start the auto refresh room details service
+            //start the RefreshRoomService to update the room details
+            displayProgressDialog();
             startAutoRefreshServices(roomId, token);
-
-            //initialise meeting list drawer
-            mlDrawer = new MeetingListDrawerImpl(RoomDetailsActivity.this, meetingListDrawerLayout);
-
-            //call ProgressRoomDetails to synchronise meeting room details with remote server
-            dialog = new ProgressDialog(RoomDetailsActivity.this);
-            this.dialog.setMessage(" Loading room details ... ");
-            this.dialog.show();
-            this.dialog.setCanceledOnTouchOutside(false);
-            this.dialog.setCancelable(false);
-            new ProgressRoomDetails(RoomDetailsActivity.this).execute();
         }
 
-        //get the current time and updates in every 1 sec.
-        Thread timeThread = null;
+        //calculates and update the meeting and current time in every seconds
         Runnable myRunnableThread = new CountDownRunner();
-        timeThread= new Thread(myRunnableThread);
+        Thread timeThread= new Thread(myRunnableThread);
         timeThread.start();
+    }
 
-
+    /**
+     * this method shows a progress dialog of loading room details
+     */
+    private void displayProgressDialog()
+    {
+        dialog = new ProgressDialog(RoomDetailsActivity.this);
+        this.dialog.setMessage(" Loading room details ... ");
+        this.dialog.show();
+        this.dialog.setCanceledOnTouchOutside(false);
+        this.dialog.setCancelable(false);
     }
 
     /**
      * this class implements runnable class and handles current time counting
      */
     class CountDownRunner implements Runnable{
-        // @Override
+        @Override
         public void run() {
             while(!Thread.currentThread().isInterrupted()){
                 try {
-                    doWork();
+                    countsTime();
                     Thread.sleep(1000); // Pause of 1 Second
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -130,20 +126,24 @@ public class RoomDetailsActivity extends Activity {
      * this methods get the current time and calculate the
      * time difference between next meeting in every seconds
      */
-    public void doWork() {
+    public void countsTime() {
         runOnUiThread(new Runnable() {
             public void run() {
                 try{
-                    //get and set current time to the header view
+                    //display the current time to the header of the view
                     TextView txtCurrentTime= (TextView)findViewById(R.id.txtCurrentTime);
                     txtCurrentTime.setText(tc.getCurrentTime());
 
-                    //calculate the time diff via timeCalculator class
-                    String timeDiff = tc.calculateTimeDiff(room.getTime());
-                    txtTime.setText(timeDiff);
+                    //update meeting table clock line in every second
+                    if(meetingTableHandler!=null) meetingTableHandler.setClockMinutesHand(txtClockLine);
 
-                    //set clock minute hand in the meeting time table
-                    meetingTableHandler.setClockMinutesHand(timeMinutesHand);
+                    //calculate and update the meeting time
+                    if(room != null)
+                    {
+                        String timeDiff = tc.calculateTimeDiff(room.getTime());
+                        txtTime.setText(timeDiff);
+                    }
+
                 }catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -152,105 +152,31 @@ public class RoomDetailsActivity extends Activity {
     }
 
     /**
-     * this progressTask class sends http request and it returns the json data of the rooms
+     * this method find all the view components of the room details activity
      */
-    private class ProgressRoomDetails extends AsyncTask<String, Void, Boolean> {
-        private Activity activity;
-        private Context context;
+    private void findViewComponents()
+    {
+        //find parent layout
+        meetingDetailsDrawerLayout = (DrawerLayout) findViewById(R.id.meeting_details_drawer_layout);
 
-        public ProgressRoomDetails(Activity activity) {
-            this.activity = activity;
-            context = activity;
-        }
-        /**
-         * onPreExecute initalise AuthenticationTask before it starts
+        //find children layout
+        meetingDetailsLayout = (LinearLayout) findViewById(R.id.meeting_details_layout);
+        headerLinerLayout = (LinearLayout) findViewById(R.id.header);
+        roomInfoLinerLayout = (LinearLayout) findViewById(R.id.roomInfo);
+        timeInfoLinerLayout = (LinearLayout) findViewById(R.id.timeInfo);
+        meetingInfoLinerLayout = (LinearLayout) findViewById(R.id.meetingInfo);
 
-         */
-        protected void onPreExecute() { }
+        //get individual view component
+        txtRoomName = (TextView) findViewById(R.id.txtRoomName);
+        txtStatus = (TextView) findViewById(R.id.txtStatus);
+        txtTime = (TextView) findViewById(R.id.txtTime);
+        btnEndMeeting = (Button) findViewById(R.id.btnEndMeeting);
+        btnExtendMeeting = (Button) findViewById(R.id.btnExtendMeeting);
+        txtClockLine = (TextView) findViewById(R.id.timeMinutesHand);
 
-        @Override
-        protected Boolean doInBackground(String... strings) {
-            //crate Json parser instance
-            jsonParser = new JSONParserImpl();
-            meetingList = new ArrayList<Meeting>();
-
-            //getting json string from url
-            String url = "rooms/"+ roomId +"?oauth_token="+ token;
-            JSONObject json = jsonParser.getJSONFromUrl(url);
-            try{
-                if(json != null)
-                {
-                    String HttpStatus = json.getString(Constants.TAG_STATUS);
-                    if(HttpStatus.equals("success"))
-                    {
-                        JSONObject data = json.getJSONObject(Constants.TAG_DATA);
-
-                        //retrieves room data and saves into room object
-                        JSONObject jRoom = data.getJSONObject(Constants.TAG_ROOM);
-                        int id = Integer.parseInt(jRoom.getString(Constants.TAG_ID));
-                        String name = jRoom.getString(Constants.TAG_NAME);
-                        int freeBusy = Integer.parseInt(jRoom.getString(Constants.TAG_FREEBUSY));
-                        String time = jRoom.getString(Constants.TAG_TIME);
-                        room = new Room(id,name,freeBusy,time);
-
-                        //retrieves array of meetings and add to the list
-                        JSONArray meetings = jRoom.getJSONArray(Constants.TAG_MEETINGS);
-                        for(int i=0; i < meetings.length(); i++)
-                        {
-                            JSONObject jMeeting = meetings.getJSONObject(i);
-                            String summary = jMeeting.getString(Constants.TAG_SUMMARY);
-                            String creator = jMeeting.getString(Constants.TAG_CREATOR);
-                            String start = jMeeting.getString(Constants.TAG_START);
-                            String end = jMeeting.getString(Constants.TAG_END);
-                            Meeting meeting = new Meeting(summary, creator, start, end);
-                            meetingList.add(meeting);
-                        }
-                    }
-                }
-            }
-            catch (JSONException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-
-            //dismiss the loading dialog
-            if(dialog.isShowing()) dialog.dismiss();
-
-            //display meeting list in the left drawer
-            mlDrawer.addMeetingList(meetingList);
-
-            //update the room and meeting timetable details to the view
-            displayItems();
-            displayMeetingdetails();
-        }
+        //get drawer layout
+        meetingListDrawerLayout = (LinearLayout) findViewById(R.id.meetingListDrawerLayout);
     }
-
-
-    /**
-     * this method displays meeting timetable and its meeting details
-     */
-    private void displayMeetingdetails() {
-
-        //erase the old views
-        meetingTimeTable.removeAllViews();
-        meetingTableHeader.removeAllViews();
-        meetingTimelineHeader.removeAllViews();
-        meetingTimelineFooter.removeAllViews();
-        //initialise meeting time table handler
-        meetingTableHandler = new MeetingTableHandler(RoomDetailsActivity.this, meetingTableHeader,
-                meetingTimeTable, meetingTimelineHeader, meetingTimelineFooter);
-        //set meeting table details
-        meetingTableHandler.addMeetingToTimeTable(meetingList);
-        meetingTableHandler.setClockMinutesHand(timeMinutesHand);
-        meetingTableHandler.setMeetingTableHeader();
-        meetingTableHandler.setMeetingTimeLineHeader(room.getStatus());
-        meetingTableHandler.setMeetingTimeLineFooter(room.getStatus());
-    }
-
 
     /**
      * this method displays meeting room details
@@ -285,41 +211,27 @@ public class RoomDetailsActivity extends Activity {
 
             //set value to the other room components
             txtRoomName.setText(room.getName());
-            //calculate the time diff via timeCalculator class
-            String timeDiff = tc.calculateTimeDiff(room.getTime());
-            txtTime.setText(timeDiff);
+//            //calculate the time diff via timeCalculator class
+//            String timeDiff = tc.calculateTimeDiff(room.getTime());
+//            txtTime.setText(timeDiff);
         }
     }
 
+    /**
+     * this method displays meeting timetable and its meeting details
+     */
+    private void displayMeetingdetails() {
 
-    private void getViewComponents()
-    {
-        //find parent layout
-        meetingDetailsDrawerLayout = (DrawerLayout) findViewById(R.id.meeting_details_drawer_layout);
-
-        //find children layout
-        meetingDetailsLayout = (LinearLayout) findViewById(R.id.meeting_details_layout);
-        headerLinerLayout = (LinearLayout) findViewById(R.id.header);
-        roomInfoLinerLayout = (LinearLayout) findViewById(R.id.roomInfo);
-        timeInfoLinerLayout = (LinearLayout) findViewById(R.id.timeInfo);
-        meetingInfoLinerLayout = (LinearLayout) findViewById(R.id.meetingInfo);
-        meetingTableHeader = (LinearLayout) findViewById(R.id.meetingTableHeader);
-        meetingTimeTable = (RelativeLayout) findViewById(R.id.meetingTableTime);
-        meetingTimelineHeader = (LinearLayout) findViewById(R.id.meetingTimeLineHeader);
-        meetingTimelineFooter = (LinearLayout) findViewById(R.id.meetingTimeLineFooter);
-
-        //get individual view component
-        txtRoomName = (TextView) findViewById(R.id.txtRoomName);
-        txtStatus = (TextView) findViewById(R.id.txtStatus);
-        txtTime = (TextView) findViewById(R.id.txtTime);
-        btnEndMeeting = (Button) findViewById(R.id.btnEndMeeting);
-        btnExtendMeeting = (Button) findViewById(R.id.btnExtendMeeting);
-        timeMinutesHand = (TextView) findViewById(R.id.timeMinutesHand);
-
-        //get drawer layout
-        meetingListDrawerLayout = (LinearLayout) findViewById(R.id.meetingListDrawerLayout);
+        //initialise meeting table handler
+        meetingTableHandler = new MeetingTableHandler(RoomDetailsActivity.this, meetingInfoLinerLayout);
+        meetingTableHandler.eraseMeetingTableView();
+        //set meeting table details
+        meetingTableHandler.addMeetingToTimeTable(meetingList);
+        meetingTableHandler.setMeetingTableHeader();
+        meetingTableHandler.setMeetingTimeLineHeader(room.getStatus());
+        meetingTableHandler.setMeetingTimeLineFooter(room.getStatus());
+        meetingTableHandler.setClockMinutesHand(txtClockLine);
     }
-
 
     /**
      * this method handles add new meeting button onClick event
@@ -359,15 +271,10 @@ public class RoomDetailsActivity extends Activity {
     }
 
     /**
-     * this method manages activity being restarted from stopped state
+     * this method calls the RefreshRoomService and start the service
+     * @param roomId, String room id
+     * @param token, String authentication token
      */
-    @Override
-    public void onRestart() {
-        super.onResume();
-        new ProgressRoomDetails(RoomDetailsActivity.this).execute();
-    }
-
-
     private void startAutoRefreshServices(String roomId, String token) {
         Intent serviceIntent = new Intent(RoomDetailsActivity.this, RefreshRoomService.class);
         serviceIntent.putExtra("roomId", roomId);
@@ -382,21 +289,27 @@ public class RoomDetailsActivity extends Activity {
     public void onResume()
     {
         super.onResume();
-        // intent to filter for download complete intent
+        // intent to filter for AUTOREFRESH broadcast message
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(AUTOREFRESH);
         //register the receiver
-        registerReceiver(autoRefreshReceiver, intentFilter);
+        registerReceiver(AutoRefreshReceiver, intentFilter);
     }
 
+    public void onPause() {
+        super.onPause();
+        unregisterReceiver(AutoRefreshReceiver);
+    }
+
+
     /**
-     * this class implements the BroadcastReceiver send by the MyService
+     * this class implements the BroadcastReceiver message that is send by the MyService
      */
-    private BroadcastReceiver autoRefreshReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver AutoRefreshReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent)
         {
-            //if receivers the download complete action it stops the music player
+            //if receives auto refresh action request it will update the view automatically
             if(intent.getAction().equals(AUTOREFRESH))
             {
                 Log.d(Constants.MAD, "download completed and start auto refresh");
@@ -408,6 +321,9 @@ public class RoomDetailsActivity extends Activity {
                 //update the room and meeting timetable details to the view
                 displayItems();
                 displayMeetingdetails();
+
+                //dismiss the loading dialog
+                if(dialog.isShowing()) dialog.dismiss();
             }
         }
     };

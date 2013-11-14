@@ -45,17 +45,26 @@ public class MeetingTableHandler {
     /**
      * default constructor initialise instances
      * @param context
-     * @param meetingTableHeader
-     * @param meetingTimeTable
+     * @param meetingInfoLinerLayout, LinearLayout of meeting info
      */
-    public MeetingTableHandler(Context context, LinearLayout meetingTableHeader,RelativeLayout meetingTimeTable,
-                               LinearLayout meetingTimelineHeader, LinearLayout meetingTimelineFooter) {
+    public MeetingTableHandler(Context context, LinearLayout meetingInfoLinerLayout) {
         this.context = context;
-        this.meetingTableHeader = meetingTableHeader;
-        this.meetingTimeTable =  meetingTimeTable;
-        this.meetingTimelineHeader = meetingTimelineHeader;
-        this.meetingTimelineFooter = meetingTimelineFooter;
+        this.meetingTableHeader = (LinearLayout) meetingInfoLinerLayout.findViewById(R.id.meetingTableHeader);
+        this.meetingTimeTable = (RelativeLayout) meetingInfoLinerLayout.findViewById(R.id.meetingTableTime);
+        this.meetingTimelineHeader = (LinearLayout) meetingInfoLinerLayout.findViewById(R.id.meetingTimeLineHeader);
+        this.meetingTimelineFooter = (LinearLayout) meetingInfoLinerLayout.findViewById(R.id.meetingTimeLineFooter);
         tc = new TimeCalculatorImpl();
+    }
+
+    /**
+     * this method erase the old components of views
+     */
+    public void eraseMeetingTableView()
+    {
+        meetingTableHeader.removeAllViews();
+        meetingTimeTable.removeAllViews();
+        meetingTimelineHeader.removeAllViews();
+        meetingTimelineFooter.removeAllViews();
     }
 
     /**
@@ -63,7 +72,6 @@ public class MeetingTableHandler {
      */
     public void setMeetingTableHeader() {
 
-        meetingTableHeader.removeAllViews();
         //displays time table
         hours = new ArrayList<String>();
         hours = tc.getCurrentAndNextHours();
@@ -108,7 +116,6 @@ public class MeetingTableHandler {
      */
     public void addMeetingToTimeTable(ArrayList<Meeting> meetings)
     {
-        meetingTimeTable.removeAllViews();
         int totalHours = 6;
         int tableWidth = meetingTimeTable.getWidth();
         int hourWidth = tableWidth / totalHours;
@@ -181,7 +188,6 @@ public class MeetingTableHandler {
      */
     public void setMeetingTimeLineHeader(int status)
     {
-        meetingTimelineHeader.removeAllViews();
         for(int i=0; i<timeRange; i++)
         {
             TextView time = new TextView(context);
@@ -203,7 +209,6 @@ public class MeetingTableHandler {
      */
     public void setMeetingTimeLineFooter(int status)
     {
-        meetingTimelineFooter.removeAllViews();
         for(int i=0; i<timeRange; i++)
         {
             TextView time = new TextView(context);
@@ -226,6 +231,7 @@ public class MeetingTableHandler {
      */
     public void setClockMinutesHand(TextView clockHand)
     {
+        //erase the old components of view
         meetingTimeTable.removeView(clockHand);
         int totalHours = 6;
         int tableWidth = meetingTimeTable.getWidth();

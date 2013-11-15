@@ -11,6 +11,11 @@
     <string name="Check">Check Room Status</string>
     <string name="welcome">Welcome to Roomee</string>
 
+    <!--string for action bar-->
+    <string name="cancel">Cancel</string>
+    <string name="submit">Submit</string>
+
+
     <color name="header_green">#38C27F</color>
     <color name="room_green">#4BC88C</color>
     <color name="time_green">#5FCE99</color>
@@ -34,9 +39,10 @@
     <color name="danger">#D9544B</color>
     <color name="completed">#989898</color>
     <color name="finished">#444444</color>
-
-
     <!--color for customised meeting status -->
+
+
+
 
 
 

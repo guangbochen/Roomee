@@ -64,14 +64,13 @@ public class RoomDetailsActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_room_details);
 
-        //initialise instances
-        tc = new TimeCalculatorImpl();
-        meetingList = new ArrayList<Meeting>();
-
         //find all of the view components in the RoomDetailsActivity
         findViewComponents();
 
-        //initialise meeting list drawer
+        //initialise instances
+        tc = new TimeCalculatorImpl();
+        meetingList = new ArrayList<Meeting>();
+        room = new Room();
         mlDrawer = new MeetingListDrawerImpl(RoomDetailsActivity.this, meetingListDrawerLayout);
 
         //retrieve data passed from RoomListActivity
@@ -132,7 +131,7 @@ public class RoomDetailsActivity extends Activity {
                 try{
                     //display the current time to the header of the view
                     TextView txtCurrentTime= (TextView)findViewById(R.id.txtCurrentTime);
-                    txtCurrentTime.setText(tc.getCurrentTime());
+                    txtCurrentTime.setText(tc.getCurrentTime(null));
 
                     //update meeting table clock line in every second
                     if(meetingTableHandler!=null) meetingTableHandler.setClockMinutesHand(txtClockLine);
@@ -241,7 +240,6 @@ public class RoomDetailsActivity extends Activity {
     {
         Intent intent = new Intent(getApplicationContext(), AddMeetingActivity.class);
         intent.putExtra("token", token);
-        intent.putExtra("roomId", room.getId());
         intent.putExtra("room", room);
         intent.putParcelableArrayListExtra("meetingList", meetingList);
         startActivity(intent);
@@ -315,12 +313,13 @@ public class RoomDetailsActivity extends Activity {
                 Log.d(Constants.MAD, "download completed and start auto refresh");
                 meetingList = intent.getParcelableArrayListExtra("meetingList");
                 room = (Room) intent.getSerializableExtra("room");
-                //display meeting list in the left drawer
-                mlDrawer.addMeetingList(meetingList);
 
                 //update the room and meeting timetable details to the view
                 displayItems();
                 displayMeetingdetails();
+
+                //display meeting list in the left drawer
+                mlDrawer.addMeetingList(meetingList);
 
                 //dismiss the loading dialog
                 if(dialog.isShowing()) dialog.dismiss();

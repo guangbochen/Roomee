@@ -1,5 +1,9 @@
 package com.vivant.roomee.timeManager;
 
+import android.util.Log;
+
+import com.vivant.roomee.model.Meeting;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -39,12 +43,28 @@ public class TimeCalculatorImpl implements  TimeCalculator{
      * this method returns the current time
      * @return currentTime, String time in timePrinter format
      */
-    public String getCurrentTime() {
-
-        Date dt = new Date();
-        String currentTime = timePrinter.format(dt);
+    public String getCurrentTime(Date date) {
+        if(date == null) date = new Date();
+        String currentTime = timePrinter.format(date);
         currentTime = currentTime.replaceAll("AM","am").replaceAll("PM", "pm");
         return  currentTime;
+    }
+
+    /**
+     * this method parse the string time into date in timePrinter format
+     * @param time, String meeting time
+     * @return Date, Date timePrinter format
+     */
+    public Date parseStringToDate(String time)
+    {
+        Date date = null;
+        try {
+            date = timePrinter.parse(time);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return date;
     }
 
     /**
@@ -98,8 +118,8 @@ public class TimeCalculatorImpl implements  TimeCalculator{
 
             //manages the minutes displaying
             if(diffMinutes == 0) minutes = "";
-            else if (diffHours > 0) minutes = "and " + String.valueOf(diffMinutes) + " minutes";
-            else minutes = String.valueOf(diffMinutes) + " minutes";
+            else if (diffHours > 0) minutes = "and " + String.valueOf(diffMinutes+1) + " minutes";
+            else minutes = String.valueOf(diffMinutes+1) + " minutes";
 
             //if both hour and minutes difference is 0, return 0 minutes
             if(diffHours == 0 && diffMinutes==0 ) return " less than 1 minute";
@@ -115,26 +135,28 @@ public class TimeCalculatorImpl implements  TimeCalculator{
 
     /**
      * this method check whether the room is already booked by another meeting or not
-     * @param meetingStart, existing meeting start time
-     * @param meetingEnd, existing meeting end time
-     * @param startTime, new added meeting start time
-     * @param endTime, new added meeting end time
      * @return false, if there is no existing meeting during the new meeting time
      */
     @Override
-    public boolean compareMeetingTime(String meetingStart, String meetingEnd, String startTime, String endTime)
+    public boolean compareMeetingTime(Date startDate, Date endDate, Meeting m)
     {
         try
         {
             //get the existing start meeting time
-            Date sMeeting = datetimeParser.parse(meetingStart);
+            Date sMeeting = datetimeParser.parse(m.getStart());
+            Log.d("Test meeting Time", String.valueOf(sMeeting));
             //get the existing end meeting time
-            Date eMeeting = datetimeParser.parse(meetingEnd);
-            String sMeetingTime = sMeeting.getHours() + ":" + sMeeting.getMinutes();
-            String eMeetingTime = eMeeting.getHours() + ":" + eMeeting.getMinutes();
+            Date eMeeting = datetimeParser.parse(m.getEnd());
+
+            String pickedStartTime = getRFCDateFormat(startDate);
+            String pickedEndTime = getRFCDateFormat(endDate);
+            Log.d("Test string sTime", pickedStartTime);
+            startDate = datetimeParser.parse(pickedStartTime);
+            endDate = datetimeParser.parse(pickedEndTime);
+            Log.d("Test sdate", String.valueOf(startDate));
 
             //if the new meeting time is before or after the existing meeting time then return as validated
-            if(startTime.compareTo(eMeetingTime) > 0 || endTime.compareTo(sMeetingTime) < 0)
+            if(startDate.compareTo(eMeeting) > 0 || endDate.compareTo(eMeeting) < 0)
                 return true;
 
         } catch (Exception e)
@@ -225,17 +247,16 @@ public class TimeCalculatorImpl implements  TimeCalculator{
 
     /**
      * this method returns date and time in RFC3339 format
-     * @param hour, selected meeting hour
-     * @param mins, selected meeting minutes
+     * @param date, Date meeting date
      * @return time, String time in RFC3339 format
      */
     @Override
-    public String getRFCDateFormat(int hour, int mins)
+    public String getRFCDateFormat(Date date)
     {
-        Date date = new Date();
-        date.setHours(hour);
-        date.setMinutes(mins);
-        String time = datetimeParser.format(date);
+        Date newDate = new Date();
+        newDate.setHours(date.getHours());
+        newDate.setMinutes(date.getMinutes());
+        String time = datetimeParser.format(newDate);
         return time;
     }
 

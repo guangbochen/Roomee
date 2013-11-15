@@ -28,8 +28,6 @@ public class Constants {
     //JSON Node for add new meeting
     public static final String TAG_MEETING = "meeting";
 
-
     //Public Constants
     public static final String MAD = "MAD";
-
 }

@@ -6,17 +6,17 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Gravity;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.DialogFragment;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TimePicker;
-import android.widget.Toast;
-
+import android.widget.LinearLayout;
 import com.vivant.roomee.json.JSONParser;
 import com.vivant.roomee.json.JSONParserImpl;
 import com.vivant.roomee.model.Constants;
@@ -24,13 +24,13 @@ import com.vivant.roomee.model.Meeting;
 import com.vivant.roomee.model.Room;
 import com.vivant.roomee.timeManager.TimeCalculator;
 import com.vivant.roomee.timeManager.TimeCalculatorImpl;
-
+import com.vivant.roomee.timeManager.TimePickerFragment;
+import com.vivant.roomee.util.DismissKeyboard;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -38,20 +38,21 @@ import java.util.List;
  * This class manages add new meeting activity
  * Created by guangbo on 28/10/13.
  */
-public class AddMeetingActivity extends Activity {
+public class AddMeetingActivity extends FragmentActivity implements TimePickerFragment.TimePickedListener {
 
-    private TimePicker pickerStartTime;
-    private TimePicker pickerEndTime;
+    private LinearLayout addNewMeetingLinearLayout;
+    private Button btnStartTime;
+    private Button btnEndTime;
     private EditText txtSummary;
     private EditText txtDescription;
-    private EditText txtRoomName;
     private TimeCalculator tc;
     private Room room;
     private ArrayList<Meeting> meetingList = new ArrayList<Meeting>();
     private JSONParser jsonParser;
+    private DismissKeyboard dismissKeyboard;
+    private Date date;
     //instances for add new meeting
     private static String token;
-    private static String roomId;
     private static String summary;
     private static String description;
     private static String startTime;
@@ -68,27 +69,41 @@ public class AddMeetingActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_add_meeting);
 
-        //set custom title for the action bar
-        ActionBar ab = getActionBar();
-        ab.setTitle("Add new meeting");
-        ab.setDisplayShowTitleEnabled(true);
-
         //find all the view contents
         findContentView();
+
+        //initialise instance
+        tc = new TimeCalculatorImpl();
+        dismissKeyboard = new DismissKeyboard(this);
+        dismissKeyboard.setupUI(addNewMeetingLinearLayout);
+        setMeetingTimes();
+
+        //dummy data
+        txtSummary.setText("Android Meeting Catch up");
+        txtDescription.setText("description for the meeting");
+
+        //set custom title for the action bar
+        ActionBar ab = getActionBar();
+        ab.setTitle("New Meeting");
+        ab.setDisplayShowTitleEnabled(true);
 
         //retrieve data passed from RoomDetailsActivity
         Bundle extras = getIntent().getExtras();
         if(extras != null)
         {
             //retrieve room and meeting data
-            roomId = extras.getString("roomId");
             token = extras.getString("token");
             room = (Room) extras.get("room");
             meetingList = extras.getParcelableArrayList("meetingList");
-
-            //set meeting room name
-            txtRoomName.setText(room.getName());
         }
+    }
+
+    private void setMeetingTimes()
+    {
+        Date date = new Date();
+        btnStartTime.setText(tc.getCurrentTime(date));
+        date.setHours(date.getHours()+1);
+        btnEndTime.setText(tc.getCurrentTime(date));
 
     }
 
@@ -101,60 +116,64 @@ public class AddMeetingActivity extends Activity {
         //get user inputs of meeting details
         summary = txtSummary.getText().toString();
         description = txtDescription.getText().toString();
+        startTime = btnStartTime.getText().toString();
+        endTime = btnEndTime.getText().toString();
 
-        Integer sHour = pickerStartTime.getCurrentHour();
-        Integer sMin = pickerStartTime.getCurrentMinute();
-
-        Integer eHour = pickerEndTime.getCurrentHour();
-        Integer eMin = pickerEndTime.getCurrentMinute();
-
+        //validate meeting summary input
         if(summary.length() == 0) {
-            //validate meeting summary input
             txtSummary.requestFocus();
             invalidMessage("Meeting summary can't be empty");
             return false;
         }
-        else if(description.length() == 0) {
-            //validate meeting description input
+
+        //validate meeting description input
+        if(description.length() == 0) {
             txtDescription.requestFocus();
             invalidMessage("Meeting description can't be empty");
             return false;
         }
-        else if((sHour > eHour) || (sHour == eHour && eMin <= sMin))
-        {
+
+        //validate meeting start and end time
+        Date startDate = tc.parseStringToDate(startTime);
+        Date endDate = tc.parseStringToDate(endTime);
+        if(startTime.length()==0) {
+            invalidMessage("Empty Meeting Start Time");
+            btnStartTime.requestFocus();
+            return false;
+        }
+        if(endTime.length()==0 ) {
+            invalidMessage("Empty Meeting End Time");
+            btnEndTime.requestFocus();
+            return false;
+        }
+        if(endDate.compareTo(startDate) <= 0) {
             //validate meeting end time
             invalidMessage("Invalid Meeting End Time ");
             return false;
         }
         else{
             //validate meeting start time and the duration time
-            if(validateMeetingTime(sHour,sMin, eHour, eMin)) return true;
+            if(validateMeetingTime(startDate, endDate)) return true;
         }
 
-        //return false if any exception occurs
         return false;
     }
 
 
     /**
      * this method validates inputted meeting start time and the meeting duration time
-     * @param sHour, int meeting start hour
-     * @param sMin, int meeting start minutes
-     * @param eHour, int meeting end hour
-     * @param eMin, int meeting end minutes
+     * @param startDate, Date start meeting time
+     * @param endDate, Date end meeting time
      * @return true, if the meeting time is validate
      */
-    private boolean validateMeetingTime(int sHour, int sMin, int eHour, int eMin) {
+    private boolean validateMeetingTime(Date startDate, Date endDate) {
 
-        //initialise instances
-        tc = new TimeCalculatorImpl();
         Date date = new Date();
-        int hour = date.getHours();
-        int min = date.getMinutes();
         //validate start meeting time
-        if((sHour < hour) || (sHour == hour && sMin<min))
+        if((startDate.getHours() < date.getHours()) ||
+                (startDate.getHours() == date.getHours() && startDate.getMinutes()<date.getMinutes()))
         {
-            String message = "Meeting start time should be greater or equal to the current time ("+tc.getCurrentTime() +")";
+            String message = "Meeting start time should be greater or equal to the current time ("+tc.getCurrentTime(null) +")";
             invalidMessage(message);
             return false;
         }
@@ -163,26 +182,17 @@ public class AddMeetingActivity extends Activity {
             //check whether there is a meeting between selected time
             for(Meeting m : meetingList)
             {
-                String sMeeting = m.getStart();
-                String eMeeting = m.getEnd();
-                String mStHour = String.valueOf(sHour);
-                String mStMin = String.valueOf(sMin);
-                String sTime = mStHour + ":" + mStMin;
-                String mEndHour = String.valueOf(eHour);
-                String mEndMin = String.valueOf(eMin);
-                String eTime = mEndHour + ":" + mEndMin;
-                if(!tc.compareMeetingTime(sMeeting,eMeeting, sTime, eTime))
+                if(!tc.compareMeetingTime(startDate, endDate, m))
                 {
-                    String message = "The room is already booked by another meeting between the selected time";
+                    String message = "Sorry, the room is already booked of the selected time";
                     invalidMessage(message);
                     return false;
                 }
             }
             //converting regular meeting time to RFC3339 format
-            startTime =  tc.getRFCDateFormat(sHour, sMin);
-            endTime =  tc.getRFCDateFormat(eHour, eMin);
+            startTime =  tc.getRFCDateFormat(startDate);
+            endTime =  tc.getRFCDateFormat(endDate);
         }
-
         return true;
     }
 
@@ -191,36 +201,84 @@ public class AddMeetingActivity extends Activity {
      */
     private void findContentView()
     {
-        pickerStartTime = (TimePicker) findViewById(R.id.pickerStartTime);
-        pickerEndTime =  (TimePicker) findViewById(R.id.pickerEndTime);
+        addNewMeetingLinearLayout = (LinearLayout) findViewById(R.id.addNewMeetingLayout);
         txtSummary = (EditText) findViewById(R.id.txtSummary);
         txtDescription = (EditText) findViewById(R.id.txtDesc);
-        txtRoomName = (EditText) findViewById(R.id.txtRoomName);
+        btnStartTime = (Button) findViewById(R.id.btnStartTime);
+        btnEndTime = (Button) findViewById(R.id.btnEndTime);
+    }
+
+    /**
+     * this method displays invalid token message
+     * @param message, string message
+     */
+    private void invalidMessage(String message)
+    {
+        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setIcon(R.drawable.ic_error);
+        alertDialog.setTitle("Error");
+        alertDialog.setMessage("\n"+message+"\n");
+        alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        alertDialog.show();
+    }
+
+    /**
+     * this method creates the menu bar of the activity
+     * @param menu, Menu
+     * @return false, do not display the menu
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.add_new_meeting, menu);
+        return true;
+    }
+
+    /**
+     * this method respond to menu action buttons
+     * @param item, menu item
+     * @return true if button is clicked
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case R.id.action_cancel:
+                cancelButtonOnClicked();
+                return true;
+            case R.id.action_submit:
+                submitButtonOnclicked();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     /**
      * this method cancel the add new meeting activity
-     * @param view, button widget
      */
-    public void cancelButtonOnClicked(View view)
+    public void cancelButtonOnClicked()
     {
         AddMeetingActivity.this.finish();
     }
 
     /**
      * this method cancel the add new meeting activity
-     * @param view, button widget
      */
-    public void submitButtonOnclicked(View view)
+    public void submitButtonOnclicked()
     {
         if(validateAddMeetingInput())
         {
+            String message = "Are you sure you want to submit?";
             new AlertDialog.Builder(this)
-                    .setMessage("Are you sure you want to submit?")
+                    .setMessage("\n"+message +"\n")
                     .setCancelable(false)
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            //onSubmitProcessed();
+                            //processing submit new meeting request
                             new AddNewMeetingTask(AddMeetingActivity.this).execute();
                         }
                     })
@@ -229,18 +287,26 @@ public class AddMeetingActivity extends Activity {
         }
     }
 
-
     /**
-     * this method displays invalid token message
-     * @param message, string message
+     * this method displays a timePicker if the time picker button is clicked
+     * @param view, Button view
      */
-    private void invalidMessage(String message)
-    {
-        Toast toast = Toast.makeText(AddMeetingActivity.this, message, Toast.LENGTH_LONG);
-        toast.setGravity(Gravity.CENTER| Gravity.CENTER_HORIZONTAL, 0, 0);
-        toast.show();
+    public void showTimePickerDialog(View view) {
+        DialogFragment newFragment = new TimePickerFragment(view);
+        newFragment.show(getSupportFragmentManager(), "timePicker");
+
     }
 
+    /**
+     * this method update the timePicker button's content after time is picked by user
+     * @param time, Calendar picked time
+     * @param view, timePicker button
+     */
+    @Override
+    public void onTimePicked(Calendar time, View view) {
+        Date date = time.getTime();
+        ((Button) view).setText(tc.getCurrentTime(date));
+    }
 
     /**
      * this is private AuthenticationTask class that validates user
@@ -249,7 +315,6 @@ public class AddMeetingActivity extends Activity {
     private class AddNewMeetingTask extends AsyncTask<String, Void, Boolean> {
 
         private ProgressDialog dialog;
-        private Activity activity;
         private Context context;
         private Boolean done;
         private String message;
@@ -258,13 +323,12 @@ public class AddMeetingActivity extends Activity {
          * AddNewMeetingTask constructor
          */
         public AddNewMeetingTask(Activity activity) {
-            this.activity = activity;
             context = activity;
             dialog = new ProgressDialog(context);
         }
 
         /**
-         * onPreExecute initalise AuthenticationTask before it starts
+         * onPreExecute initialise AuthenticationTask before it starts
          */
         protected void onPreExecute() {
             this.dialog.setMessage("Add new meeting ...");
@@ -324,8 +388,9 @@ public class AddMeetingActivity extends Activity {
 
             if(done == true)
             {
+                String message = "Thanks, you have created new meeting successfully.";
                 AlertDialog.Builder builder = new AlertDialog.Builder(AddMeetingActivity.this);
-                builder.setMessage("Thanks, you have created new meeting successfully.")
+                builder.setMessage("\n"+message +"\n")
                         .setCancelable(false)
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {

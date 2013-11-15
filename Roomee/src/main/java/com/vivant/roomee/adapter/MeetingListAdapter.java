@@ -94,6 +94,17 @@ public class MeetingListAdapter extends BaseAdapter {
 
 
     /**
+     * this method notify the list view to update its data
+     * @param meetings, ArrayList of meeting
+     */
+    public void updateResults(ArrayList<Meeting> meetings) {
+        this.meetings = meetings;
+        //Triggers the list update
+        notifyDataSetChanged();
+    }
+
+
+    /**
      * this method returns total count of list items
      */
     @Override

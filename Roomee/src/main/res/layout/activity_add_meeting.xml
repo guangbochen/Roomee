@@ -10,33 +10,13 @@
     android:layout_height="match_parent">
 
     <LinearLayout
+        android:paddingTop="10sp"
+        android:id="@+id/addNewMeetingLayout"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
-
-        <LinearLayout
-            android:id="@+id/layoutRoom"
-            android:orientation="horizontal"
-            android:layout_gravity="center"
-            android:layout_height="wrap_content"
-            android:layout_width="500dp">
-            <TextView
-                android:layout_weight="2"
-                android:gravity="bottom"
-                android:layout_height="match_parent"
-                android:layout_width="match_parent"
-                android:fontFamily="sans-serif"
-                android:textSize="15dp"
-                android:text="Meeting Room" />
-
-            <EditText
-                android:id="@+id/txtRoomName"
-                android:layout_weight="1"
-                android:layout_height="match_parent"
-                android:layout_width="match_parent"
-                android:editable="false" />
-
-        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/layoutSummary"
@@ -52,115 +32,109 @@
                 android:fontFamily="sans-serif"
                 android:textSize="15dp"
                 android:text="Meeting Summary" />
-
-            <EditText
-                android:id="@+id/txtSummary"
+            <FrameLayout
                 android:layout_weight="1"
                 android:layout_height="match_parent"
-                android:layout_width="match_parent"
-                android:maxLength="30"
-                android:maxLines="1"
-                android:hint="Enter meeting summary"
-                android:text="New Meeting CatchUp" />
+                android:layout_width="match_parent" >
+                <EditText
+                    android:id="@+id/txtSummary"
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
+                    android:maxLength="30"
+                    android:singleLine="true"
+                    android:maxLines="1" />
+                <Button
+                    android:id="@+id/calc_clear_txt_Prise"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="10dp"
+                    android:layout_gravity="right|center_vertical"
+                    android:background="@drawable/ic_cancel" />
+            </FrameLayout>
 
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/layoutSummary"
-            android:paddingTop="10dp"
+            android:paddingTop="15dp"
             android:orientation="horizontal"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_width="500dp">
-        <TextView
-            android:layout_weight="2"
-            android:textSize="15dp"
-            android:gravity="bottom"
-            android:layout_height="match_parent"
-            android:layout_width="match_parent"
-            android:text="Meeting Description" />
+            <TextView
+                android:layout_weight="2"
+                android:textSize="15dp"
+                android:gravity="bottom"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:text="Meeting Description" />
 
-        <EditText
-            android:id="@+id/txtDesc"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:layout_width="match_parent"
-            android:maxLength="50"
-            android:maxLines="1"
-            android:hint="Enter meeting description"
-            android:text="This is test description"
-            />
+            <EditText
+                android:id="@+id/txtDesc"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:singleLine="true"
+                android:maxLength="50"
+                android:maxLines="1" />
 
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/layoutMeetingStart"
             android:orientation="horizontal"
-            android:layout_height="150dp"
+            android:paddingTop="15dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_width="500dp">
             <TextView
-                android:layout_weight="4"
-                android:gravity="center_vertical"
+                android:layout_weight="2"
+                android:gravity="bottom"
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
                 android:textSize="15dp"
                 android:text="Meeting Start" />
 
-            <TimePicker
-                android:id="@+id/pickerStartTime"
+            <Button
+                android:id="@+id/btnStartTime"
                 android:layout_weight="1"
-                android:layout_gravity="left"
-                android:layout_marginLeft="-20dp"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent" />
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:singleLine="true"
+                style="?android:spinnerStyle"
+                android:textSize="16sp"
+                android:maxLength="50"
+                android:maxLines="1"
+                android:onClick="showTimePickerDialog" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/layoutMeetingStart"
             android:orientation="horizontal"
-            android:layout_height="150dp"
+            android:paddingTop="15dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_width="500dp">
             <TextView
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
                 android:textSize="15dp"
-                android:gravity="center_vertical"
-                android:layout_weight="4"
+                android:gravity="bottom"
+                android:layout_weight="2"
                 android:text="Meeting End" />
-            <TimePicker
-                android:id="@+id/pickerEndTime"
-                android:layout_marginLeft="-20dp"
+
+            <Button
+                android:id="@+id/btnEndTime"
                 android:layout_weight="1"
-                android:layout_gravity="left"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent" />
+                android:layout_height="match_parent"
+                android:textSize="16sp"
+                android:layout_width="match_parent"
+                android:singleLine="true"
+                style="?android:spinnerStyle"
+                android:maxLength="50"
+                android:maxLines="1"
+                android:onClick="showTimePickerDialog" />
         </LinearLayout>
 
-
-        <LinearLayout
-            android:id="@+id/layoutMeetingEnd"
-            android:orientation="horizontal"
-            android:paddingTop="10dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center|bottom"
-            android:layout_width="400dp">
-            <Button
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Cancel"
-                android:background="@color/warning"
-                android:onClick="cancelButtonOnClicked"
-                android:layout_width="wrap_content" />
-            <Button
-                android:layout_marginLeft="15dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Submit"
-                android:background="@color/success"
-                android:onClick="submitButtonOnclicked"
-                android:layout_width="wrap_content" />
-        </LinearLayout>
     </LinearLayout>
 </ScrollView>

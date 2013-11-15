@@ -13,17 +13,33 @@
         <item name="android:actionBarStyle">@style/thin_ab_style</item>
     </style>
 
-    <!-- Action bar style  -->
+    <style name="AddNewMeetingTheme" parent="android:Theme.Holo.Light">
+        <item name="android:actionBarStyle">@style/thick_ab_style</item>
+    </style>
+
+    <!-- thin Action bar style  -->
     <style name="thin_ab_style" parent="android:Theme.Holo.Light">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
         <item name="android:background">@color/action_bar_bg</item>
-        <item name="android:height">25dp</item>
+        <item name="android:height">30dp</item>
         <item name="android:titleTextStyle">@style/AppBaseTheme.ActionBar.TitleTextStyle</item>
     </style>
+
 
     <style name="AppBaseTheme.ActionBar.TitleTextStyle" parent="@android:Theme.Holo.Light">
         <item name="android:textColor">@color/black</item>
         <item name="android:textSize">14sp</item>
     </style>
 
+    <!-- thick Action bar style  -->
+    <style name="thick_ab_style" parent="android:Theme.Holo.Light">
+        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+        <item name="android:background">@color/action_bar_bg</item>
+        <item name="android:height">45dp</item>
+        <item name="android:titleTextStyle">@style/AddNewMeetingTheme.ActionBar.TitleTextStyle</item>
+    </style>
+    <style name="AddNewMeetingTheme.ActionBar.TitleTextStyle" parent="@android:Theme.Holo.Light">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">16sp</item>
+    </style>
 </resources>

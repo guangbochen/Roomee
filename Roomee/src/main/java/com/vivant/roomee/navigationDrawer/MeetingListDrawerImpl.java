@@ -1,6 +1,7 @@
 package com.vivant.roomee.navigationDrawer;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.Gravity;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -9,6 +10,7 @@ import com.vivant.roomee.R;
 import com.vivant.roomee.adapter.MeetingListAdapter;
 import com.vivant.roomee.model.Meeting;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by guangbo on 8/11/13.
@@ -32,7 +34,14 @@ public class MeetingListDrawerImpl implements MeetingListDrawer {
      */
     @Override
     public void addMeetingList(ArrayList<Meeting> meetings) {
-        adapter = new MeetingListAdapter(context,meetings);
+        if(adapter == null){
+            Log.d("DD", "create new");
+            adapter = new MeetingListAdapter(context,meetings);
+        }
+        else  {
+            Log.d("DD", "update ");
+            adapter.updateResults(meetings);
+        }
         meetingListView.setAdapter(adapter);
     }
 }

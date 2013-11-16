@@ -26,7 +26,7 @@
             android:layout_width="500dp">
             <TextView
                 android:layout_weight="2"
-                android:gravity="bottom"
+                android:gravity="center_vertical"
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
                 android:fontFamily="sans-serif"
@@ -34,7 +34,7 @@
                 android:text="Meeting Summary" />
             <FrameLayout
                 android:layout_weight="1"
-                android:layout_height="match_parent"
+                android:layout_height="45sp"
                 android:layout_width="match_parent" >
                 <EditText
                     android:id="@+id/txtSummary"
@@ -42,14 +42,18 @@
                     android:layout_width="match_parent"
                     android:maxLength="30"
                     android:singleLine="true"
+                    android:background="@drawable/edit_text_border"
+                    android:paddingLeft="10sp"
                     android:maxLines="1" />
-                <Button
-                    android:id="@+id/calc_clear_txt_Prise"
+                <ImageButton
+                    android:id="@+id/btn_clear_summary"
+                    android:onClick="emptyEditText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="10dp"
+                    android:layout_marginRight="5dp"
+                    android:visibility="invisible"
                     android:layout_gravity="right|center_vertical"
-                    android:background="@drawable/ic_cancel" />
+                    android:background="@drawable/ic_action_empty" />
             </FrameLayout>
 
         </LinearLayout>
@@ -64,20 +68,39 @@
             <TextView
                 android:layout_weight="2"
                 android:textSize="15dp"
-                android:gravity="bottom"
+                android:gravity="center_vertical"
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
                 android:text="Meeting Description" />
 
-            <EditText
-                android:id="@+id/txtDesc"
+            <FrameLayout
                 android:layout_weight="1"
-                android:layout_height="match_parent"
-                android:layout_width="match_parent"
-                android:singleLine="true"
-                android:maxLength="50"
-                android:maxLines="1" />
-
+                android:layout_height="105sp"
+                android:layout_width="match_parent" >
+                <EditText
+                    android:id="@+id/txtDesc"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
+                    android:gravity="top"
+                    android:maxLength="50"
+                    android:scrollbars="vertical"
+                    android:inputType="textMultiLine"
+                    android:background="@drawable/edit_text_border"
+                    android:padding="10sp"
+                    android:maxLines="3"
+                    android:minLines="3" />
+                <ImageButton
+                    android:id="@+id/btn_clear_desc"
+                    android:onClick="emptyEditText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
+                    android:layout_gravity="right|top"
+                    android:paddingTop="5sp"
+                    android:visibility="invisible"
+                    android:background="@drawable/ic_action_empty" />
+            </FrameLayout>
         </LinearLayout>
 
         <LinearLayout
@@ -89,7 +112,7 @@
             android:layout_width="500dp">
             <TextView
                 android:layout_weight="2"
-                android:gravity="bottom"
+                android:gravity="center_vertical"
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
                 android:textSize="15dp"
@@ -101,6 +124,7 @@
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
                 android:singleLine="true"
+                android:paddingLeft="10sp"
                 style="?android:spinnerStyle"
                 android:textSize="16sp"
                 android:maxLength="50"
@@ -119,7 +143,7 @@
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
                 android:textSize="15dp"
-                android:gravity="bottom"
+                android:gravity="center_vertical"
                 android:layout_weight="2"
                 android:text="Meeting End" />
 
@@ -128,6 +152,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:textSize="16sp"
+                android:paddingLeft="10sp"
                 android:layout_width="match_parent"
                 android:singleLine="true"
                 style="?android:spinnerStyle"

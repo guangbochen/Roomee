@@ -1,24 +1,22 @@
 package com.vivant.roomee;
+
+import android.app.ActivityManager;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.vivant.roomee.handler.MeetingTableHandler;
-import com.vivant.roomee.json.JSONParser;
-import com.vivant.roomee.json.JSONParserImpl;
-import com.vivant.roomee.model.Constants;
 import com.vivant.roomee.model.Meeting;
 import com.vivant.roomee.model.Room;
 import com.vivant.roomee.navigationDrawer.MeetingListDrawer;
@@ -26,9 +24,6 @@ import com.vivant.roomee.navigationDrawer.MeetingListDrawerImpl;
 import com.vivant.roomee.services.RefreshRoomService;
 import com.vivant.roomee.timeManager.TimeCalculator;
 import com.vivant.roomee.timeManager.TimeCalculatorImpl;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import java.util.ArrayList;
 
 public class RoomDetailsActivity extends Activity {
@@ -46,17 +41,17 @@ public class RoomDetailsActivity extends Activity {
     private LinearLayout headerLinerLayout;
     private LinearLayout roomInfoLinerLayout;
     private LinearLayout timeInfoLinerLayout;
-    private LinearLayout meetingInfoLinerLayout;
+    private RelativeLayout meetingInfoLayout;
     private LinearLayout meetingListDrawerLayout;
     private DrawerLayout meetingDetailsDrawerLayout;
     //view components for room details
     private TextView txtStatus;
     private TextView txtRoomName;
     private TextView txtTime;
+    private TextView timeline;
     private Button btnEndMeeting;
     private Button btnExtendMeeting;
-    private TextView txtClockLine;
-    private final static String BROADCAST = "com.vivant.roomee.services.broadcast";
+    private final static String BROADCAST = "com.vivant.roomee.startRoomService";
     private final static String AUTOREFRESH = "com.vivant.roomee.services.autoRefresh";
 
     @Override
@@ -133,15 +128,16 @@ public class RoomDetailsActivity extends Activity {
                     TextView txtCurrentTime= (TextView)findViewById(R.id.txtCurrentTime);
                     txtCurrentTime.setText(tc.getCurrentTime(null));
 
-                    //update meeting table clock line in every second
-                    if(meetingTableHandler!=null) meetingTableHandler.setClockMinutesHand(txtClockLine);
-
                     //calculate and update the meeting time
-                    if(room != null)
+                    if(!room.equals(null))
                     {
                         String timeDiff = tc.calculateTimeDiff(room.getTime());
                         txtTime.setText(timeDiff);
                     }
+
+                    //update meeting table clock line in every second
+                    if(meetingTableHandler!=null) meetingTableHandler.setClockMinutesHand(timeline);
+
 
                 }catch (Exception e) {
                     e.printStackTrace();
@@ -163,7 +159,7 @@ public class RoomDetailsActivity extends Activity {
         headerLinerLayout = (LinearLayout) findViewById(R.id.header);
         roomInfoLinerLayout = (LinearLayout) findViewById(R.id.roomInfo);
         timeInfoLinerLayout = (LinearLayout) findViewById(R.id.timeInfo);
-        meetingInfoLinerLayout = (LinearLayout) findViewById(R.id.meetingInfo);
+        meetingInfoLayout = (RelativeLayout) findViewById(R.id.meetingInfo);
 
         //get individual view component
         txtRoomName = (TextView) findViewById(R.id.txtRoomName);
@@ -171,7 +167,7 @@ public class RoomDetailsActivity extends Activity {
         txtTime = (TextView) findViewById(R.id.txtTime);
         btnEndMeeting = (Button) findViewById(R.id.btnEndMeeting);
         btnExtendMeeting = (Button) findViewById(R.id.btnExtendMeeting);
-        txtClockLine = (TextView) findViewById(R.id.timeMinutesHand);
+        timeline = (TextView) findViewById(R.id.timeMinutesHand);
 
         //get drawer layout
         meetingListDrawerLayout = (LinearLayout) findViewById(R.id.meetingListDrawerLayout);
@@ -191,7 +187,7 @@ public class RoomDetailsActivity extends Activity {
                 headerLinerLayout.setBackgroundColor(getResources().getColor(R.color.header_red));
                 roomInfoLinerLayout.setBackgroundColor(getResources().getColor(R.color.room_red));
                 timeInfoLinerLayout.setBackgroundColor(getResources().getColor(R.color.time_red));
-                meetingInfoLinerLayout.setBackgroundColor(getResources().getColor(R.color.time_red));
+                meetingInfoLayout.setBackgroundColor(getResources().getColor(R.color.time_red));
                 btnExtendMeeting.setVisibility(View.VISIBLE);
                 btnEndMeeting.setVisibility(View.VISIBLE);
                 txtStatus.setText("Busy for");
@@ -202,7 +198,7 @@ public class RoomDetailsActivity extends Activity {
                 headerLinerLayout.setBackgroundColor(getResources().getColor(R.color.header_green));
                 roomInfoLinerLayout.setBackgroundColor(getResources().getColor(R.color.room_green));
                 timeInfoLinerLayout.setBackgroundColor(getResources().getColor(R.color.time_green));
-                meetingInfoLinerLayout.setBackgroundColor(getResources().getColor(R.color.time_green));
+                meetingInfoLayout.setBackgroundColor(getResources().getColor(R.color.time_green));
                 btnExtendMeeting.setVisibility(View.INVISIBLE);
                 btnEndMeeting.setVisibility(View.INVISIBLE);
                 txtStatus.setText("Free for");
@@ -210,9 +206,6 @@ public class RoomDetailsActivity extends Activity {
 
             //set value to the other room components
             txtRoomName.setText(room.getName());
-//            //calculate the time diff via timeCalculator class
-//            String timeDiff = tc.calculateTimeDiff(room.getTime());
-//            txtTime.setText(timeDiff);
         }
     }
 
@@ -222,14 +215,13 @@ public class RoomDetailsActivity extends Activity {
     private void displayMeetingdetails() {
 
         //initialise meeting table handler
-        meetingTableHandler = new MeetingTableHandler(RoomDetailsActivity.this, meetingInfoLinerLayout);
+        meetingTableHandler = new MeetingTableHandler(RoomDetailsActivity.this, meetingInfoLayout);
         meetingTableHandler.eraseMeetingTableView();
         //set meeting table details
-        meetingTableHandler.addMeetingToTimeTable(meetingList);
         meetingTableHandler.setMeetingTableHeader();
         meetingTableHandler.setMeetingTimeLineHeader(room.getStatus());
         meetingTableHandler.setMeetingTimeLineFooter(room.getStatus());
-        meetingTableHandler.setClockMinutesHand(txtClockLine);
+        meetingTableHandler.addMeetingToTimeTable(meetingList, room.getStatus());
     }
 
     /**
@@ -274,10 +266,47 @@ public class RoomDetailsActivity extends Activity {
      * @param token, String authentication token
      */
     private void startAutoRefreshServices(String roomId, String token) {
-        Intent serviceIntent = new Intent(RoomDetailsActivity.this, RefreshRoomService.class);
-        serviceIntent.putExtra("roomId", roomId);
-        serviceIntent.putExtra("token", token);
-        startService(serviceIntent);
+        if(isMyServiceRunning() == true)
+        {
+            //start download file by sending broadcast intent to MyService
+            Intent intent = new Intent();
+            intent.setAction(BROADCAST);
+            sendBroadcast(intent);
+        }
+        else
+        {
+            Intent serviceIntent = new Intent(RoomDetailsActivity.this, RefreshRoomService.class);
+            serviceIntent.putExtra("roomId", roomId);
+            serviceIntent.putExtra("token", token);
+            startService(serviceIntent);
+        }
+    }
+
+    /**
+     * this method checks whether MyService is running or not
+     * @return false if service is not running
+     */
+    private boolean isMyServiceRunning() {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (RefreshRoomService.class.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /************************************
+     ** manages the activity life cycle **
+     ************************************/
+
+    /**
+     * this method manages activity when it restart from onStop status
+     */
+    @Override
+    public void onRestart() {
+        super.onRestart();
+        startAutoRefreshServices(roomId,token);
     }
 
     /**
@@ -294,11 +323,22 @@ public class RoomDetailsActivity extends Activity {
         registerReceiver(AutoRefreshReceiver, intentFilter);
     }
 
+    /**
+     * this method manages activity of onPause situation, when a semi-transparent activity opens
+     */
+    @Override
     public void onPause() {
         super.onPause();
         unregisterReceiver(AutoRefreshReceiver);
     }
 
+    /**
+     * this method manages the activity when it is hidden
+     */
+    @Override
+    public void onStop() {
+        super.onStop();
+    }
 
     /**
      * this class implements the BroadcastReceiver message that is send by the MyService
@@ -310,7 +350,6 @@ public class RoomDetailsActivity extends Activity {
             //if receives auto refresh action request it will update the view automatically
             if(intent.getAction().equals(AUTOREFRESH))
             {
-                Log.d(Constants.MAD, "download completed and start auto refresh");
                 meetingList = intent.getParcelableArrayListExtra("meetingList");
                 room = (Room) intent.getSerializableExtra("room");
 
@@ -326,4 +365,5 @@ public class RoomDetailsActivity extends Activity {
             }
         }
     };
+
 }

@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import com.vivant.roomee.json.JSONParser;
@@ -24,9 +23,8 @@ import java.util.ArrayList;
 public class RefreshRoomService extends Service {
 
     private final static String AUTOREFRESH = "com.vivant.roomee.services.autoRefresh";
-    private final static String BROADCAST = "com.vivant.roomee.services.broadcast";
+    private final static String BROADCAST = "com.vivant.roomee.startRoomService";
     private IntentFilter mIntentFilter;
-    private final static String MAD = "TEST";
     private Room room;
     private ArrayList<Meeting> meetingList;
     private JSONParser jsonParser;
@@ -49,7 +47,6 @@ public class RefreshRoomService extends Service {
         mIntentFilter = new IntentFilter();
         mIntentFilter.addAction(BROADCAST);
         registerReceiver(mBroadcastReceiver,mIntentFilter);
-        Log.d(MAD, "onCreate");
     }
 
     /**
@@ -61,16 +58,12 @@ public class RefreshRoomService extends Service {
         {
             roomId = intent.getStringExtra("roomId");
             token = intent.getStringExtra("token");
-            Log.d(MAD,roomId);
-            Log.d(MAD, token);
 
             //start the auto refresh counter
-            Thread timeThread = null;
             Runnable myRunnableThread = new AutoRefreshRoomdetails();
-            timeThread= new Thread(myRunnableThread);
+            Thread timeThread =  new Thread(myRunnableThread);
             timeThread.start();
         }
-        Log.d(MAD, "Starting service");
         return START_STICKY;
     }
 
@@ -93,6 +86,7 @@ public class RefreshRoomService extends Service {
         public void run() {
             while(!Thread.currentThread().isInterrupted()){
                 try {
+                    Log.d("TEST", "Thread sleep 30 sec.");
                     new DownloadThread().execute();
                     Thread.sleep(30000); // Pause of 30 Second
                 } catch (InterruptedException e) {
@@ -104,7 +98,7 @@ public class RefreshRoomService extends Service {
     }
 
     /**
-     * This class implements the Broadcast receiver
+     * This class implements the Broadcast receiver and pull data from web service
      */
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -112,8 +106,6 @@ public class RefreshRoomService extends Service {
             String action = intent.getAction();
             if(action.equals(BROADCAST))
             {
-                Log.d(MAD, "Request fresh Service");
-                //implements downloadTask thread and sleeps for 15 seconds
                 new DownloadThread().execute();
             }
         }
@@ -170,21 +162,16 @@ public class RefreshRoomService extends Service {
         }
 
         /**
-         * this method sends a broadcast message once the thread is finished
+         * this method sends a broadcast message once finished parsing the JSON data
          */
         @Override
         protected void onPostExecute(Long Interval) {
             //once the request is complete it sends a broadcast message
-            Log.d(MAD, "thread after sleep");
             Intent intent = new Intent();
             intent.putParcelableArrayListExtra("meetingList", meetingList);
             intent.putExtra("room", room);
             intent.setAction(AUTOREFRESH);
             sendBroadcast(intent);
-            for(Meeting m : meetingList)
-            {
-                Log.d(MAD, m.getSummary());
-            }
         }
     }
 

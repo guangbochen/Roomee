@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 import com.vivant.roomee.json.JSONParser;
 import com.vivant.roomee.json.JSONParserImpl;
@@ -24,9 +25,10 @@ import org.json.JSONObject;
  * this class manages user login activity
  * and validates API key via the Roomee web services
  */
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements View.OnFocusChangeListener {
 
     private EditText txtAPIKey;
+    private ImageButton btnEmptyKey;
     private final static String title = "Welcome to Roomee";
 
     /**
@@ -37,6 +39,11 @@ public class MainActivity extends Activity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
+
+        //find the view
+        btnEmptyKey = (ImageButton) findViewById(R.id.btn_empty_key);
+        txtAPIKey = (EditText) findViewById(R.id.txtAPIKey);
+        txtAPIKey.setOnFocusChangeListener(this);
 
         //set custom title for the main activity
         ActionBar ab = getActionBar();
@@ -50,7 +57,6 @@ public class MainActivity extends Activity {
      * it validate the API key through Roomee web service
      */
     public void loginButtonOnClick(View view) {
-        txtAPIKey = (EditText) findViewById(R.id.txtAPIKey);
         try
         {
             String apiKey = txtAPIKey.getText().toString();
@@ -70,6 +76,19 @@ public class MainActivity extends Activity {
         catch (Exception e)
         {
             e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void onFocusChange(View view, boolean hasFocus) {
+        if(view.getId() == txtAPIKey.getId() && hasFocus)
+        {
+            if(txtAPIKey.getText().length()>0)
+                btnEmptyKey.setVisibility(1);
+        }
+        else {
+            view.setVisibility(0);
         }
 
     }

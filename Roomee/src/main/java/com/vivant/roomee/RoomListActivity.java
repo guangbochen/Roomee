@@ -186,7 +186,7 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
      */
     @Override
     public void onRestart() {
-        super.onResume();
+        super.onRestart();
         //update the room list via calling the progressTask
 //        roomList = new ArrayList<Room>();
 //        new ProgressTask(RoomListActivity.this, token).execute();

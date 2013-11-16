@@ -16,6 +16,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import com.vivant.roomee.json.JSONParser;
 import com.vivant.roomee.json.JSONParserImpl;
@@ -38,11 +40,13 @@ import java.util.List;
  * This class manages add new meeting activity
  * Created by guangbo on 28/10/13.
  */
-public class AddMeetingActivity extends FragmentActivity implements TimePickerFragment.TimePickedListener {
+public class AddMeetingActivity extends FragmentActivity implements TimePickerFragment.TimePickedListener, View.OnFocusChangeListener {
 
     private LinearLayout addNewMeetingLinearLayout;
     private Button btnStartTime;
     private Button btnEndTime;
+    private ImageButton btnClearSummary;
+    private ImageButton btnClearDesc;
     private EditText txtSummary;
     private EditText txtDescription;
     private TimeCalculator tc;
@@ -81,6 +85,8 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
         //dummy data
         txtSummary.setText("Android Meeting Catch up");
         txtDescription.setText("description for the meeting");
+        txtSummary.setOnFocusChangeListener(this);
+        txtDescription.setOnFocusChangeListener(this);
 
         //set custom title for the action bar
         ActionBar ab = getActionBar();
@@ -98,6 +104,9 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
         }
     }
 
+    /**
+     * this method set the original time of meeting time picker
+     */
     private void setMeetingTimes()
     {
         Date date = new Date();
@@ -105,6 +114,18 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
         date.setHours(date.getHours()+1);
         btnEndTime.setText(tc.getCurrentTime(date));
 
+    }
+
+    /**
+     * this method empty the content of selected editText
+     * @param view, ImageButton view
+     */
+    public void emptyEditText(View view)
+    {
+        if(view.getId() == btnClearSummary.getId())
+            txtSummary.setText("");
+        else if (view.getId() == btnClearDesc.getId())
+            txtDescription.setText("");
     }
 
     /**
@@ -206,6 +227,8 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
         txtDescription = (EditText) findViewById(R.id.txtDesc);
         btnStartTime = (Button) findViewById(R.id.btnStartTime);
         btnEndTime = (Button) findViewById(R.id.btnEndTime);
+        btnClearSummary = (ImageButton) findViewById(R.id.btn_clear_summary);
+        btnClearDesc = (ImageButton) findViewById(R.id.btn_clear_desc);
     }
 
     /**
@@ -306,6 +329,22 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
     public void onTimePicked(Calendar time, View view) {
         Date date = time.getTime();
         ((Button) view).setText(tc.getCurrentTime(date));
+    }
+
+    @Override
+    public void onFocusChange(View view, boolean hasFocus) {
+        if(view.getId() == txtSummary.getId() && hasFocus)
+        {
+            btnClearDesc.setVisibility(0);
+            if(txtSummary.getText().length()>0)
+                btnClearSummary.setVisibility(1);
+
+        }
+        else if(view.getId() == txtDescription.getId() && hasFocus) {
+            btnClearSummary.setVisibility(0);
+            if(txtDescription.getText().length()>0)
+                btnClearDesc.setVisibility(1);
+        }
     }
 
     /**

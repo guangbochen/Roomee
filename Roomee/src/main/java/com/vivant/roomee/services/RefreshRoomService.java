@@ -104,8 +104,10 @@ public class RefreshRoomService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if(action.equals(BROADCAST))
+            if(action.equals(BROADCAST) && intent.getExtras() != null)
             {
+                roomId = intent.getStringExtra("roomId");
+                token = intent.getStringExtra("token");
                 new DownloadThread().execute();
             }
         }

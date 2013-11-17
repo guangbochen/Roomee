@@ -88,8 +88,7 @@
                     android:inputType="textMultiLine"
                     android:background="@drawable/edit_text_border"
                     android:padding="10sp"
-                    android:maxLines="3"
-                    android:minLines="3" />
+                    android:maxLines="3"/>
                 <ImageButton
                     android:id="@+id/btn_clear_desc"
                     android:onClick="emptyEditText"
@@ -97,7 +96,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginRight="5dp"
                     android:layout_gravity="right|top"
-                    android:paddingTop="5sp"
+                    android:layout_marginTop="10sp"
                     android:visibility="invisible"
                     android:background="@drawable/ic_action_empty" />
             </FrameLayout>

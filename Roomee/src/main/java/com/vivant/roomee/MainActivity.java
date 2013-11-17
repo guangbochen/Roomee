@@ -1,22 +1,25 @@
 package com.vivant.roomee;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.Toast;
+import android.widget.LinearLayout;
+
 import com.vivant.roomee.json.JSONParser;
 import com.vivant.roomee.json.JSONParserImpl;
 import com.vivant.roomee.model.Constants;
+import com.vivant.roomee.util.DismissKeyboard;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,11 +28,12 @@ import org.json.JSONObject;
  * this class manages user login activity
  * and validates API key via the Roomee web services
  */
-public class MainActivity extends Activity implements View.OnFocusChangeListener {
+public class MainActivity extends Activity {
 
     private EditText txtAPIKey;
-    private ImageButton btnEmptyKey;
     private final static String title = "Welcome to Roomee";
+    private DismissKeyboard dismissKeyboard;
+    private LinearLayout mainActivityLayout;
 
     /**
      * onCreate method initialises the view of main activity
@@ -40,17 +44,28 @@ public class MainActivity extends Activity implements View.OnFocusChangeListener
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
 
+        findViewComponents();
+        //manages dismiss key board action
+        dismissKeyboard = new DismissKeyboard(this);
+        dismissKeyboard.setupUI(mainActivityLayout);
+
+    }
+
+    /**
+     * this method find the activity views
+     */
+    private void findViewComponents()
+    {
         //find the view
-        btnEmptyKey = (ImageButton) findViewById(R.id.btn_empty_key);
+        mainActivityLayout = (LinearLayout) findViewById(R.id.main_activity_layout);
         txtAPIKey = (EditText) findViewById(R.id.txtAPIKey);
-        txtAPIKey.setOnFocusChangeListener(this);
 
         //set custom title for the main activity
         ActionBar ab = getActionBar();
         ab.setTitle(title);
         ab.setDisplayShowTitleEnabled(true);
-
     }
+
 
     /**
      * this method handles loginButton onclick event
@@ -61,34 +76,20 @@ public class MainActivity extends Activity implements View.OnFocusChangeListener
         {
             String apiKey = txtAPIKey.getText().toString();
             //if is empty displays error message
-            if(apiKey.length() == 0)
-            {
-                String message = "Empty API Key";
-                displayErrorMessage(message);
+            if(apiKey.length() == 0) {
+                String message = "Password cannot be empty";
+                invalidMessage(message);
                 txtAPIKey.requestFocus();
             }
             else
             {
-                //validate the API key and login
+                //validate the API key via roomee web service
                 new AuthenticationTask(MainActivity.this, apiKey).execute();
             }
         }
         catch (Exception e)
         {
             e.printStackTrace();
-        }
-
-    }
-
-    @Override
-    public void onFocusChange(View view, boolean hasFocus) {
-        if(view.getId() == txtAPIKey.getId() && hasFocus)
-        {
-            if(txtAPIKey.getText().length()>0)
-                btnEmptyKey.setVisibility(1);
-        }
-        else {
-            view.setVisibility(0);
         }
 
     }
@@ -119,10 +120,10 @@ public class MainActivity extends Activity implements View.OnFocusChangeListener
          * onPreExecute initialises AuthenticationTask before it starts
          */
         protected void onPreExecute() {
-            this.message = "No internet connection";
-            this.dialog.setMessage("Validating API key...");
+            this.message = "Please check internet connection";
+            this.dialog.setMessage("Please wait...");
             this.dialog.setCanceledOnTouchOutside(false);
-            this.dialog.setCancelable(false);
+            this.dialog.setCancelable(true);
             this.dialog.show();
         }
 
@@ -137,7 +138,6 @@ public class MainActivity extends Activity implements View.OnFocusChangeListener
             done = false;
             //crate Json parser instance
             JSONParser jsonParser = new JSONParserImpl();
-
             try{
                 //getting json data from url
                 String url = "auth?api_key=" + apiKey;
@@ -175,7 +175,7 @@ public class MainActivity extends Activity implements View.OnFocusChangeListener
             //if is not valid API key displays server validation message
             if(done == false)
             {
-                displayErrorMessage(message);
+                invalidMessage(message);
             }
             else {
                 //if is valid user login and calls roomList activity
@@ -187,14 +187,18 @@ public class MainActivity extends Activity implements View.OnFocusChangeListener
     }
 
     /**
-     * this method displays toast message
+     * this method displays invalid token message
      * @param message, string message
      */
-    private void displayErrorMessage(String message)
+    private void invalidMessage(String message)
     {
-        Toast toast = Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG);
-        toast.setGravity(Gravity.CENTER|Gravity.CENTER_HORIZONTAL, 0, 0);
-        toast.show();
+        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setMessage("\n"+message+"\n");
+        alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        alertDialog.show();
     }
 
     /**

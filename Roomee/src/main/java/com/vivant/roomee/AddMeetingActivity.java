@@ -157,19 +157,9 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
         //validate meeting start and end time
         Date startDate = tc.parseStringToDate(startTime);
         Date endDate = tc.parseStringToDate(endTime);
-        if(startTime.length()==0) {
-            invalidMessage("Empty Meeting Start Time");
-            btnStartTime.requestFocus();
-            return false;
-        }
-        if(endTime.length()==0 ) {
-            invalidMessage("Empty Meeting End Time");
-            btnEndTime.requestFocus();
-            return false;
-        }
         if(endDate.compareTo(startDate) <= 0) {
             //validate meeting end time
-            invalidMessage("Invalid Meeting End Time ");
+            invalidMessage("Invalid meeting end time ");
             return false;
         }
         else{
@@ -205,7 +195,7 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
             {
                 if(!tc.compareMeetingTime(startDate, endDate, m))
                 {
-                    String message = "Sorry, the room is already booked of the selected time";
+                    String message = "Sorry, the room is already booked by another meeting of the selected time";
                     invalidMessage(message);
                     return false;
                 }
@@ -238,7 +228,6 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
     private void invalidMessage(String message)
     {
         AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-        alertDialog.setIcon(R.drawable.ic_error);
         alertDialog.setTitle("Error");
         alertDialog.setMessage("\n"+message+"\n");
         alertDialog.setButton("OK", new DialogInterface.OnClickListener() {

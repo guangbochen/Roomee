@@ -1,52 +1,54 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:layout_gravity="center"
-    android:focusable="false"
-    android:focusableInTouchMode="true"
-    >
+    android:paddingBottom="@dimen/activity_vertical_margin">
 
-    <FrameLayout
-        android:layout_height="50sp"
-        android:layout_width="250sp" >
+    <LinearLayout
+        android:id="@+id/main_activity_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_gravity="center_horizontal"
+        android:focusable="false"
+        android:focusableInTouchMode="true">
+
+        <ImageView
+            android:layout_marginTop="30sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ic_main_bg" />
+
         <EditText
-            android:paddingLeft="10sp"
             android:id="@+id/txtAPIKey"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:paddingLeft="10sp"
+            android:layout_marginTop="30dp"
+            android:drawableLeft="@drawable/ic_secure"
+            android:inputType="textPassword"
+            android:layout_height="50sp"
+            android:layout_width="250sp"
             android:hint="Enter password"
             android:layout_gravity="center"
             android:maxLines="1"
             android:background="@drawable/edit_text_border"
             android:singleLine="true"
-            android:text="lrn6a1n3"
-            />
-        <ImageButton
-            android:id="@+id/btn_empty_key"
-            android:layout_width="wrap_content"
+            android:text="lrn6a1n3"/>
+
+        <Button
+            android:id="@+id/btnLogin"
+            android:layout_marginTop="20dp"
+            android:layout_width="250dp"
             android:layout_height="wrap_content"
-            android:layout_marginRight="5sp"
-            android:visibility="invisible"
-            android:layout_gravity="right|center_vertical"
-            android:background="@drawable/ic_action_empty" />
-    </FrameLayout>
+            android:onClick="loginButtonOnClick"
+            android:singleLine="true"
+            android:background="@drawable/success_button"
+            android:textColor="@color/white"
+            android:layout_gravity="center"
+            android:text="@string/Login" />
 
-    <Button
-        android:id="@+id/btnLogin"
-        android:layout_marginTop="15dp"
-        android:layout_width="250dp"
-        android:layout_height="wrap_content"
-        android:onClick="loginButtonOnClick"
-        android:singleLine="true"
-        android:background="@color/success"
-        android:textColor="@color/white"
-        android:layout_gravity="center"
-        android:text="@string/Login" />
-
-</LinearLayout>
+    </LinearLayout>
+</ScrollView>

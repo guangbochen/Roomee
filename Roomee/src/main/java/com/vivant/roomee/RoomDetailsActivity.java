@@ -32,7 +32,7 @@ public class RoomDetailsActivity extends Activity {
     private static String token;
     private Room room;
     private ArrayList<Meeting> meetingList;
-    private MeetingTableHandler meetingTableHandler;
+    private MeetingTableHandler mtHandler;
     private TimeCalculator tc;
     private ProgressDialog dialog;
     private MeetingListDrawer mlDrawer;
@@ -64,8 +64,6 @@ public class RoomDetailsActivity extends Activity {
 
         //initialise instances
         tc = new TimeCalculatorImpl();
-        meetingList = new ArrayList<Meeting>();
-        room = new Room();
         mlDrawer = new MeetingListDrawerImpl(RoomDetailsActivity.this, meetingListDrawerLayout);
 
         //retrieve data passed from RoomListActivity
@@ -92,7 +90,7 @@ public class RoomDetailsActivity extends Activity {
     private void displayProgressDialog()
     {
         dialog = new ProgressDialog(RoomDetailsActivity.this);
-        this.dialog.setMessage(" Loading room details ... ");
+        this.dialog.setMessage(" Please wait ... ");
         this.dialog.show();
         this.dialog.setCanceledOnTouchOutside(false);
         this.dialog.setCancelable(false);
@@ -129,15 +127,13 @@ public class RoomDetailsActivity extends Activity {
                     txtCurrentTime.setText(tc.getCurrentTime(null));
 
                     //calculate and update the meeting time
-                    if(!room.equals(null))
-                    {
+                    if(room != null) {
                         String timeDiff = tc.calculateTimeDiff(room.getTime());
                         txtTime.setText(timeDiff);
                     }
 
                     //update meeting table clock line in every second
-                    if(meetingTableHandler!=null) meetingTableHandler.setClockMinutesHand(timeline);
-
+                    if(mtHandler!=null) mtHandler.addTimeline(timeline);
 
                 }catch (Exception e) {
                     e.printStackTrace();
@@ -215,13 +211,13 @@ public class RoomDetailsActivity extends Activity {
     private void displayMeetingdetails() {
 
         //initialise meeting table handler
-        meetingTableHandler = new MeetingTableHandler(RoomDetailsActivity.this, meetingInfoLayout);
-        meetingTableHandler.eraseMeetingTableView();
+        mtHandler = new MeetingTableHandler(RoomDetailsActivity.this, meetingInfoLayout);
+        mtHandler.eraseMeetingTableView();
         //set meeting table details
-        meetingTableHandler.setMeetingTableHeader();
-        meetingTableHandler.setMeetingTimeLineHeader(room.getStatus());
-        meetingTableHandler.setMeetingTimeLineFooter(room.getStatus());
-        meetingTableHandler.addMeetingToTimeTable(meetingList, room.getStatus());
+        mtHandler.setMeetingTableHeader();
+        mtHandler.setMeetingTimeLineHeader(room.getStatus());
+        mtHandler.setMeetingTimeLineFooter(room.getStatus());
+        mtHandler.addMeetingToTimeTable(meetingList, room.getStatus());
     }
 
     /**
@@ -269,16 +265,18 @@ public class RoomDetailsActivity extends Activity {
         if(isMyServiceRunning() == true)
         {
             //start download file by sending broadcast intent to MyService
-            Intent intent = new Intent();
-            intent.setAction(BROADCAST);
-            sendBroadcast(intent);
+            Intent i = new Intent();
+            i.putExtra("roomId", roomId);
+            i.putExtra("token", token);
+            i.setAction(BROADCAST);
+            sendBroadcast(i);
         }
         else
         {
-            Intent serviceIntent = new Intent(RoomDetailsActivity.this, RefreshRoomService.class);
-            serviceIntent.putExtra("roomId", roomId);
-            serviceIntent.putExtra("token", token);
-            startService(serviceIntent);
+            Intent i = new Intent(RoomDetailsActivity.this, RefreshRoomService.class);
+            i.putExtra("roomId", roomId);
+            i.putExtra("token", token);
+            startService(i);
         }
     }
 
@@ -296,7 +294,7 @@ public class RoomDetailsActivity extends Activity {
         return false;
     }
 
-    /************************************
+    /*************************************
      ** manages the activity life cycle **
      ************************************/
 
@@ -306,7 +304,7 @@ public class RoomDetailsActivity extends Activity {
     @Override
     public void onRestart() {
         super.onRestart();
-        startAutoRefreshServices(roomId,token);
+        startAutoRefreshServices(roomId, token);
     }
 
     /**
@@ -316,7 +314,7 @@ public class RoomDetailsActivity extends Activity {
     public void onResume()
     {
         super.onResume();
-        // intent to filter for AUTOREFRESH broadcast message
+        // intent to filter for auto-refresh broadcast message
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(AUTOREFRESH);
         //register the receiver
@@ -333,20 +331,18 @@ public class RoomDetailsActivity extends Activity {
     }
 
     /**
-     * this method manages the activity when it is hidden
-     */
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
-    /**
      * this class implements the BroadcastReceiver message that is send by the MyService
      */
     private BroadcastReceiver AutoRefreshReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent)
         {
+            //lazy init instance
+            if(room == null || meetingList == null) {
+                meetingList = new ArrayList<Meeting>();
+                room = new Room();
+            }
+
             //if receives auto refresh action request it will update the view automatically
             if(intent.getAction().equals(AUTOREFRESH))
             {
@@ -357,7 +353,7 @@ public class RoomDetailsActivity extends Activity {
                 displayItems();
                 displayMeetingdetails();
 
-                //display meeting list in the left drawer
+                //update meeting list for the searching meeting drawer
                 mlDrawer.addMeetingList(meetingList);
 
                 //dismiss the loading dialog

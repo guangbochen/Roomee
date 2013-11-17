@@ -7,14 +7,12 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
-import android.widget.Toast;
 import com.vivant.roomee.adapter.RoomListAdapter;
 import com.vivant.roomee.json.JSONParser;
 import com.vivant.roomee.json.JSONParserImpl;
@@ -28,11 +26,11 @@ import java.util.List;
 
 public class RoomListActivity extends Activity implements OnItemClickListener {
 
-    private boolean done;
     private JSONParser jsonParser;
     private List<Room> roomList = new ArrayList<Room>();
     private String token;
     private ListView roomListView;
+    private final static String title ="Meeting rooms";
 
     /**
      * onCreate method initialise the view of RoomListActivity
@@ -44,35 +42,38 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_room_list);
 
-        //set custom title for the main activity
-        ActionBar ab = getActionBar();
-        ab.setTitle("Welcome to Roomee");
-        ab.setDisplayShowTitleEnabled(true);
+        findViewComponents();
 
-        done = false;
-
-        //validates the oauth_token is exist
+        //retrieves the oauth_token number
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
-
-            roomListView = (ListView) findViewById(R.id.roomListView);
+            //calls async task to load list of rooms
             token = extras.getString("token");
-
-            //access Roomee web service server and retrieve json data
-            // for meeting rooms via calling the progressTask
             new ProgressTask(RoomListActivity.this, token).execute();
             roomListView.setOnItemClickListener(this);
-
         }
-
     }
+
+    /**
+     * this method find the activity views
+     */
+    private void findViewComponents()
+    {
+        roomListView = (ListView) findViewById(R.id.roomListView);
+
+        //set custom title for the main activity
+        ActionBar ab = getActionBar();
+        ab.setTitle(title);
+        ab.setDisplayShowTitleEnabled(true);
+    }
+
 
     /**
      * this progressTask class sends http request and it returns the json data of the rooms
      */
     private class ProgressTask extends AsyncTask<String, Void, Boolean> {
 
-        private Activity activity;
+        private boolean done;
         private Context context;
         private String token;
         private ProgressDialog dialog;
@@ -81,10 +82,9 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
          * ProgressTask constructor
          */
         public ProgressTask(Activity activity, String token) {
-            this.activity = activity;
-            context = activity;
+            this.context = activity;
             this.token = token;
-            dialog = new ProgressDialog(context);
+            this.dialog = new ProgressDialog(context);
         }
 
         /**
@@ -95,6 +95,7 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
             this.dialog.show();
             this.dialog.setCanceledOnTouchOutside(false);
             this.dialog.setCancelable(false);
+            done = false;
         }
 
         /**
@@ -144,22 +145,13 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
 
             //dismiss the loading dialog
             if(dialog.isShowing()) dialog.dismiss();
-
             if(done == true)
             {
                 //update the room items to the list view
-                RoomListAdapter adapter = new RoomListAdapter(activity,roomList);
+                RoomListAdapter adapter = new RoomListAdapter(context,roomList);
                 roomListView.setAdapter(adapter);
             }
-            else
-            {
-                //display invalid token Toast message
-                Toast toast = Toast.makeText(context, "Server internal error, please try again", Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER|Gravity.CENTER_HORIZONTAL, 0, 0);
-                toast.show();
-            }
         }
-
     }
 
     /**

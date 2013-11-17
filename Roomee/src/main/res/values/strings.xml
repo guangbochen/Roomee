@@ -35,7 +35,7 @@
     <color name="drawer_title_bg">#405DA0</color>
 
     <!--color for customised buttons -->
-    <color name="success">#49A434</color>
+    <color name="success">#5EB84C</color>
     <color name="warning">#F0AE35</color>
     <color name="primary">#418AD0</color>
     <color name="danger">#D9544B</color>

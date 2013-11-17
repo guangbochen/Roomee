@@ -111,14 +111,15 @@ public class TimeCalculatorImpl implements  TimeCalculator{
             long diffHours = diff / (MINUTES * MINUTES * SECONDS) % HOURS;
 
             String hours , minutes;
-            //manages the hours displaying
+            //manages the string time format
             if (diffHours <= 0) hours = "";
             else if(diffHours>1) hours = String.valueOf(diffHours) + " hours ";
             else  hours = String.valueOf(diffHours) + " hour ";
 
             //manages the minutes displaying
-            if(diffMinutes == 0) minutes = "";
+            if(diffMinutes <= 0) minutes = "";
             else if (diffHours > 0) minutes = "and " + String.valueOf(diffMinutes+1) + " minutes";
+            else if (diffHours> 0 && diffMinutes == 59) minutes = "and " + String.valueOf(diffMinutes) + " minutes";
             else minutes = String.valueOf(diffMinutes+1) + " minutes";
 
             //if both hour and minutes difference is 0, return 0 minutes
@@ -256,6 +257,7 @@ public class TimeCalculatorImpl implements  TimeCalculator{
         Date newDate = new Date();
         newDate.setHours(date.getHours());
         newDate.setMinutes(date.getMinutes());
+        newDate.setSeconds(0);
         String time = datetimeParser.format(newDate);
         return time;
     }

@@ -35,11 +35,9 @@ public class MeetingListDrawerImpl implements MeetingListDrawer {
     @Override
     public void addMeetingList(ArrayList<Meeting> meetings) {
         if(adapter == null){
-            Log.d("DD", "create new");
             adapter = new MeetingListAdapter(context,meetings);
         }
         else  {
-            Log.d("DD", "update ");
             adapter.updateResults(meetings);
         }
         meetingListView.setAdapter(adapter);

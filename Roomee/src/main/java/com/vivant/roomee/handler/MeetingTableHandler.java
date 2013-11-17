@@ -230,21 +230,25 @@ public class MeetingTableHandler {
     /**
      * this method add minutes hand to the meeting time table
      */
-    public void setClockMinutesHand(TextView timeline)
+    public void addTimeline(TextView timeline)
     {
+        timeline.invalidate();
         int totalHours = 6;
         int tableWidth = meetingTimelineHeader.getWidth();
         int hourWidth = tableWidth / totalHours;
+        //set timeLine container layout
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.MATCH_PARENT);
         //get the clock minutes hand location via calculating the current time
         Date date = new Date();
         int mins = date.getMinutes();
+        //set the time line location
         int padding = ((mins*100)/HOUR)*hourWidth/100;
-        lp.setMargins(padding-2,0,0,0);
+        if(padding >2) padding -= 2;
+        lp.setMargins(padding,0,0,0);
         lp.addRule(RelativeLayout.BELOW, meetingTimelineHeader.getId());
         timeline.setLayoutParams(lp);
-        timeline.invalidate();
+        timeline.setBackgroundResource(R.drawable.timeline);
 
     }
 }

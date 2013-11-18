@@ -12,12 +12,10 @@ import com.vivant.roomee.R;
 import com.vivant.roomee.model.Meeting;
 import com.vivant.roomee.timeManager.TimeCalculator;
 import com.vivant.roomee.timeManager.TimeCalculatorImpl;
-
 import java.util.ArrayList;
-import java.util.Date;
 
 /**
- * This class add a list of meeting to the searching meeting drawer
+ * This class displays a list of meeting to the searching MeetingList Drawer
  * Created by guangbo on 8/11/13.
  */
 public class MeetingListAdapter extends BaseAdapter {
@@ -25,6 +23,11 @@ public class MeetingListAdapter extends BaseAdapter {
     private Context context;
     private TimeCalculator tc;
 
+    /**
+     * constructor to initalise instances
+     * @param context, context
+     * @param meetings, ArrayList of meeting
+     */
     public MeetingListAdapter(Context context, ArrayList<Meeting> meetings) {
         this.context = context;
         this.meetings = meetings;
@@ -40,6 +43,13 @@ public class MeetingListAdapter extends BaseAdapter {
         TextView txtTime;
     }
 
+    /**
+     * this method returns a list view of meetings that the MeetingList Drawer contains
+     * @param position, index position
+     * @param view, View
+     * @param parent, ViewGroup about parent view
+     * @return View, meeting view
+     */
     @Override
     public View getView(int position, View view, ViewGroup parent) {
 

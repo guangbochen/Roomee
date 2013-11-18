@@ -1,34 +1,23 @@
 package com.vivant.roomee.handler;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 import com.vivant.roomee.R;
-import com.vivant.roomee.model.Constants;
 import com.vivant.roomee.model.Meeting;
 import com.vivant.roomee.timeManager.TimeCalculator;
 import com.vivant.roomee.timeManager.TimeCalculatorImpl;
 
-import org.w3c.dom.Text;
-
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-
 /**
+ * This class manages the view of meeting time table in the RoomDetails Activity
  * Created by guangbo on 24/10/13.
  */
 public class MeetingTableHandler {
@@ -180,7 +169,6 @@ public class MeetingTableHandler {
         }
 
         //add view to the time table
-//        meeting.bringToFront();
         meetingTimeTable.addView(meeting);
     }
 
@@ -233,22 +221,40 @@ public class MeetingTableHandler {
     public void addTimeline(TextView timeline)
     {
         timeline.invalidate();
-        int totalHours = 6;
-        int tableWidth = meetingTimelineHeader.getWidth();
-        int hourWidth = tableWidth / totalHours;
+        int padding = compareToTimelines();
         //set timeLine container layout
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.MATCH_PARENT);
         //get the clock minutes hand location via calculating the current time
-        Date date = new Date();
-        int mins = date.getMinutes();
-        //set the time line location
-        int padding = ((mins*100)/HOUR)*hourWidth/100;
-        if(padding >2) padding -= 2;
         lp.setMargins(padding,0,0,0);
         lp.addRule(RelativeLayout.BELOW, meetingTimelineHeader.getId());
         timeline.setLayoutParams(lp);
         timeline.setBackgroundResource(R.drawable.timeline);
-
     }
+
+
+    /**
+     * this method calculates the position that the timeline should moves
+     * @return
+     */
+    private int compareToTimelines()
+    {
+        int padding = 0;
+        //count the hour width
+        int totalHours = 6;
+        int tableWidth = meetingTimelineHeader.getWidth();
+        int hourWidth = tableWidth / totalHours;
+
+        //count the time line location
+        Date date = new Date();
+        int mins = date.getMinutes();
+        padding = ((mins*100)/HOUR)*hourWidth/100;
+        //compare the current hour to the timelins first hour
+        int diff = tc.compareTimelineHours(date);
+        padding += hourWidth*diff;
+
+        if(padding>1) padding -= 2;
+        return padding;
+    }
+
 }

@@ -12,6 +12,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
+ * This class displays a TimePicker fragment that allows user to pick the time
  * Created by guangbo on 15/11/13.
  */
 public class TimePickerFragment extends DialogFragment implements TimePickerDialog.OnTimeSetListener {
@@ -19,6 +20,10 @@ public class TimePickerFragment extends DialogFragment implements TimePickerDial
     private Button btnTime;
     private TimeCalculator tc;
 
+    /**
+     * constructor to initialise the instances
+     * @param view
+     */
     public TimePickerFragment(View view) {
         btnTime = (Button) view;
         tc = new TimeCalculatorImpl();

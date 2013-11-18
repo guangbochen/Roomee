@@ -1,10 +1,10 @@
 package com.vivant.roomee;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
@@ -13,24 +13,26 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import com.loopj.android.http.JsonHttpResponseHandler;
 import com.vivant.roomee.adapter.RoomListAdapter;
-import com.vivant.roomee.json.JSONParser;
-import com.vivant.roomee.json.JSONParserImpl;
+import com.vivant.roomee.json.RoomeeRestClient;
 import com.vivant.roomee.model.Constants;
 import com.vivant.roomee.model.Room;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
 public class RoomListActivity extends Activity implements OnItemClickListener {
 
-    private JSONParser jsonParser;
-    private List<Room> roomList = new ArrayList<Room>();
+    private static boolean done;
+    private List<Room> roomList;
     private String token;
     private ListView roomListView;
     private final static String title ="Meeting rooms";
+    private final static String dialogMessage ="Loading rooms ...";
+    private ProgressDialog dialog;
+    private RoomListAdapter adapter;
 
     /**
      * onCreate method initialise the view of RoomListActivity
@@ -42,6 +44,8 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_room_list);
 
+        //initialise instance
+        roomList = new ArrayList<Room>();
         findViewComponents();
 
         //retrieves the oauth_token number
@@ -49,7 +53,8 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
         if(extras != null) {
             //calls async task to load list of rooms
             token = extras.getString("token");
-            new ProgressTask(RoomListActivity.this, token).execute();
+            displayProgressDialog();
+            UpdateRoomList();
             roomListView.setOnItemClickListener(this);
         }
     }
@@ -67,91 +72,31 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
         ab.setDisplayShowTitleEnabled(true);
     }
 
+    /**
+     * this method displays the progress dialog
+     */
+    private void displayProgressDialog() {
+        this.dialog = new ProgressDialog(RoomListActivity.this);
+        this.dialog.setMessage(dialogMessage);
+        this.dialog.show();
+        this.dialog.setCanceledOnTouchOutside(false);
+        this.dialog.setCancelable(false);
+        done = false;
+    }
 
     /**
-     * this progressTask class sends http request and it returns the json data of the rooms
+     * this method displays invalid token message
+     * @param message, string message
      */
-    private class ProgressTask extends AsyncTask<String, Void, Boolean> {
-
-        private boolean done;
-        private Context context;
-        private String token;
-        private ProgressDialog dialog;
-
-        /**
-         * ProgressTask constructor
-         */
-        public ProgressTask(Activity activity, String token) {
-            this.context = activity;
-            this.token = token;
-            this.dialog = new ProgressDialog(context);
-        }
-
-        /**
-         * onPreExecute initialise ProgressTask before it starts
-         */
-        protected void onPreExecute() {
-            this.dialog.setMessage("Loading rooms ...");
-            this.dialog.show();
-            this.dialog.setCanceledOnTouchOutside(false);
-            this.dialog.setCancelable(false);
-            done = false;
-        }
-
-        /**
-         * doInBackground method parse the json data that is
-         * returned from Roomee web service server
-         */
-        @Override
-        protected Boolean doInBackground(String... strings) {
-
-            //crate Json parser instance
-            jsonParser = new JSONParserImpl();
-
-            //add token to the url
-            String url = "rooms?oauth_token=" +token;
-            try{
-                JSONObject json = jsonParser.getJSONFromUrl(url);
-                String HttpStatus = json.getString(Constants.TAG_STATUS);
-                if(HttpStatus.equals("success"))
-                {
-                    JSONObject data = json.getJSONObject(Constants.TAG_DATA);
-                    JSONArray rooms = data.getJSONArray(Constants.TAG_ROOMS);
-                    for(int i=0; i < rooms.length(); i++)
-                    {
-                        JSONObject JSONRoom = rooms.getJSONObject(i);
-                        int id = Integer.parseInt(JSONRoom.getString(Constants.TAG_ID));
-                        String name = JSONRoom.getString(Constants.TAG_NAME);
-                        int freeBusy = Integer.parseInt(JSONRoom.getString(Constants.TAG_FREEBUSY));
-                        String time = JSONRoom.getString(Constants.TAG_TIME);
-                        Room room = new Room(id,name,freeBusy,time);
-                        roomList.add(room);
-                    }
-                    done = true;
-                }
+    private void invalidMessage(String message)
+    {
+        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setMessage("\n"+message+"\n");
+        alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
             }
-            catch (JSONException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        /**
-         * onPostExecute method manges action should be done
-         * after the doInBackground method is finished
-         */
-        @Override
-        protected void onPostExecute(final Boolean success) {
-
-            //dismiss the loading dialog
-            if(dialog.isShowing()) dialog.dismiss();
-            if(done == true)
-            {
-                //update the room items to the list view
-                RoomListAdapter adapter = new RoomListAdapter(context,roomList);
-                roomListView.setAdapter(adapter);
-            }
-        }
+        });
+        alertDialog.show();
     }
 
     /**
@@ -166,21 +111,86 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
         startActivity(intent);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.room_list, menu);
-        return false;
-    }
-
     /**
      * this method manages activity being restarted from stopped state
      */
     @Override
     public void onRestart() {
         super.onRestart();
-        //update the room list via calling the progressTask
-//        roomList = new ArrayList<Room>();
-//        new ProgressTask(RoomListActivity.this, token).execute();
+        UpdateRoomList();
+    }
+
+
+    /**
+     * this method calls the remote web services to load a list of meeting rooms
+     */
+    public void UpdateRoomList() {
+        //initialise instance
+        String url = "rooms?oauth_token=" +token;
+
+        RoomeeRestClient.get(url, null, new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(JSONObject json) {
+                try {
+                    // Pull out the first event on the public timeline
+                    String HttpStatus = json.getString(Constants.TAG_STATUS);
+                    if(HttpStatus.equals("success"))
+                    {
+                        JSONObject data = json.getJSONObject(Constants.TAG_DATA);
+                        JSONArray rooms = data.getJSONArray(Constants.TAG_ROOMS);
+                        roomList = new ArrayList<Room>();
+                        for(int i=0; i < rooms.length(); i++)
+                        {
+                            JSONObject JSONRoom = rooms.getJSONObject(i);
+                            int id = Integer.parseInt(JSONRoom.getString(Constants.TAG_ID));
+                            String name = JSONRoom.getString(Constants.TAG_NAME);
+                            int freeBusy = Integer.parseInt(JSONRoom.getString(Constants.TAG_FREEBUSY));
+                            String time = JSONRoom.getString(Constants.TAG_TIME);
+                            Room room = new Room(id,name,freeBusy,time);
+                            roomList.add(room);
+                        }
+                        done = true;
+
+                        //displays list of meeting rooms after loading the data
+                        displaysMeetingRooms();
+                    }
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    /**
+     * this method displays a list of meeting rooms after loading the data from restful service
+     */
+    private void displaysMeetingRooms() {
+
+        if(done == true)
+        {
+            //update the room items to the list view
+            adapter = new RoomListAdapter(RoomListActivity.this,roomList);
+            roomListView.setAdapter(adapter);
+        }
+        else
+        {
+            invalidMessage(Constants.NOINTERNET);
+        }
+        //dismiss the loading dialog
+        if(dialog.isShowing()) dialog.dismiss();
+    }
+
+    /**
+     * this method display the activity menu bar
+     * @param menu, menu bar
+     * @return false, not showing the menu
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.room_list, menu);
+        return false;
     }
 }

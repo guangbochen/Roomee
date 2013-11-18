@@ -30,4 +30,16 @@ public class Constants {
 
     //Public Constants
     public static final String MAD = "MAD";
+    public static final String NOINTERNET = "Please check internet connection";
+
+    //const string for addNewMeeting Activity
+    public final static String ADDNEWMEETINGTITLE = "New Meeting";
+    public final static String BOOKEDROOM="There is already a meeting set to take place during your selected times.";
+    public final static String SUBMIT="Are you sure you want to book this meeting?";
+    public final static String SUBMITSUCCESS="Thanks, your meeting has been successfully created!";
+    public final static String SUBMISIONFAILED = "Submission failed, please try again";
+    public final static String EMPTYSUMMARY = "Meeting summary can't be empty.";
+    public final static String EMPTYDESC = "Meeting description can't be empty.";
+    public final static String INVALIDENDMEETING = "Invalid meeting end time.";
+
 }

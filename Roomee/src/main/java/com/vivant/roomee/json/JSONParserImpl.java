@@ -35,7 +35,9 @@ public class JSONParserImpl implements JSONParser {
     /**
      * constructor to initialise variables
      */
-    public JSONParserImpl() { }
+    public JSONParserImpl() {
+        jObj = new JSONObject();
+    }
 
     /**
      * this method manages HTTP GET request

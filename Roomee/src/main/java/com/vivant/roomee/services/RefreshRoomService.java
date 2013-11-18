@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.util.Log;
+
 import com.vivant.roomee.json.JSONParser;
 import com.vivant.roomee.json.JSONParserImpl;
 import com.vivant.roomee.model.Constants;
@@ -18,6 +19,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 /**
+ * This is Android Service that manages to auto refresh the room and meeting data and send
+ * Broadcast message to the RoomDetails Activity to update the room and meeting contents
  * Created by guangbo on 11/11/13.
  */
 public class RefreshRoomService extends Service {
@@ -30,6 +33,7 @@ public class RefreshRoomService extends Service {
     private JSONParser jsonParser;
     private static String roomId;
     private static String token;
+    private Thread timeThread;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -61,32 +65,32 @@ public class RefreshRoomService extends Service {
 
             //start the auto refresh counter
             Runnable myRunnableThread = new AutoRefreshRoomdetails();
-            Thread timeThread =  new Thread(myRunnableThread);
+            timeThread =  new Thread(myRunnableThread);
             timeThread.start();
         }
         return START_STICKY;
     }
 
     /**
-     * this method stop the music player and stop the service once onDestroy is called
+     * this method destroy the service once it is on called
      */
     @Override
     public void onDestroy() {
         super.onDestroy();
         stopSelf();
+        timeThread.interrupt();
         unregisterReceiver(mBroadcastReceiver);
     }
-
 
     /**
      * this class implements runnable class and handles current time counting
      */
     class AutoRefreshRoomdetails implements Runnable{
-        // @Override
+        @Override
         public void run() {
             while(!Thread.currentThread().isInterrupted()){
                 try {
-                    Log.d("TEST", "Thread sleep 30 sec.");
+                    Log.d("Services", "Thread sleep 30 sec.");
                     new DownloadThread().execute();
                     Thread.sleep(30000); // Pause of 30 Second
                 } catch (InterruptedException e) {
@@ -117,15 +121,25 @@ public class RefreshRoomService extends Service {
      * This class implements AsyncTask to manages the sleep thread
      */
     private class DownloadThread extends AsyncTask<Integer, Integer, Long> {
+        private String message;
+
+        /**
+         * onPreExecute initialises DownloadThread before it starts
+         */
+        protected void onPreExecute() {
+            this.message = Constants.NOINTERNET;
+        }
+
         @Override
         protected Long doInBackground(Integer... arg0) {
             //crate Json parser instance
             jsonParser = new JSONParserImpl();
             meetingList = new ArrayList<Meeting>();
+            JSONObject json = new JSONObject();
 
             //getting json string from url
             String url = "rooms/"+ roomId +"?oauth_token="+ token;
-            JSONObject json = jsonParser.getJSONFromUrl(url);
+            json = jsonParser.getJSONFromUrl(url);
             try{
                 if(json != null)
                 {
@@ -154,6 +168,7 @@ public class RefreshRoomService extends Service {
                             Meeting meeting = new Meeting(summary, creator, start, end);
                             meetingList.add(meeting);
                         }
+                        message = HttpStatus;
                     }
                 }
             }
@@ -170,6 +185,7 @@ public class RefreshRoomService extends Service {
         protected void onPostExecute(Long Interval) {
             //once the request is complete it sends a broadcast message
             Intent intent = new Intent();
+            intent.putExtra("message", message);
             intent.putParcelableArrayListExtra("meetingList", meetingList);
             intent.putExtra("room", room);
             intent.setAction(AUTOREFRESH);

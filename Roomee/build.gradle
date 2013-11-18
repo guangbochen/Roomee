@@ -31,6 +31,7 @@ configurations {
 
 dependencies {
     compile files('libs/android-support-v4.jar')
+    compile files('libs/android-async-http-1.4.4.jar')
 }
 
 android.applicationVariants.all { variant ->

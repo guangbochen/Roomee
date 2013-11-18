@@ -20,6 +20,7 @@ public interface TimeCalculator {
     public int calculatesDuration(String startTime, String endTime);
     public int getTimeDiffByCurrentTime(String startTime);
     public int checkRoomStatus(String startTime, String endTime);
+    public int compareTimelineHours(Date date);
 
     //parse or format date in RFC339 format
     public String getRFCDateFormat(Date date);

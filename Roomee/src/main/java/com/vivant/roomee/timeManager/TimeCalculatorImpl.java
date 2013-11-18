@@ -118,9 +118,8 @@ public class TimeCalculatorImpl implements  TimeCalculator{
 
             //manages the minutes displaying
             if(diffMinutes <= 0) minutes = "";
-            else if (diffHours > 0) minutes = "and " + String.valueOf(diffMinutes+1) + " minutes";
-            else if (diffHours> 0 && diffMinutes == 59) minutes = "and " + String.valueOf(diffMinutes) + " minutes";
-            else minutes = String.valueOf(diffMinutes+1) + " minutes";
+            else if (diffHours > 0) minutes = "and " + String.valueOf(diffMinutes) + " minutes";
+            else minutes = String.valueOf(diffMinutes) + " minutes";
 
             //if both hour and minutes difference is 0, return 0 minutes
             if(diffHours == 0 && diffMinutes==0 ) return " less than 1 minute";
@@ -281,5 +280,22 @@ public class TimeCalculatorImpl implements  TimeCalculator{
 
         return time;
     }
+
+
+    /**
+     * this method compare the current hour to the timelines first hour and returns the difference
+     * @param date, Date current date
+     * @return diff, int hour difference
+     */
+    public int compareTimelineHours(Date date)
+    {
+        int diff = 0;
+        String hour = hourPrinter.format(date);
+        hour = hour.replaceAll("AM","am").replaceAll("PM", "pm");
+        if(date.getHours()!= 10 && date.getHours()!= 22 ) hour = hour.replaceAll("0","");
+        diff = hour.compareTo(hours.get(0));
+        return diff;
+    }
+
 
 }

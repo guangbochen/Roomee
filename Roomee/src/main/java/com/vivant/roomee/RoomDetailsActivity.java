@@ -1,9 +1,11 @@
 package com.vivant.roomee;
 
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -26,10 +28,15 @@ import com.vivant.roomee.timeManager.TimeCalculator;
 import com.vivant.roomee.timeManager.TimeCalculatorImpl;
 import java.util.ArrayList;
 
+/**
+ * this class manages displaying the RoomDetails activity and
+ * update the contents if the room status is updated.
+ */
 public class RoomDetailsActivity extends Activity {
 
     private static String roomId;
     private static String token;
+    private static boolean done;
     private Room room;
     private ArrayList<Meeting> meetingList;
     private MeetingTableHandler mtHandler;
@@ -53,6 +60,8 @@ public class RoomDetailsActivity extends Activity {
     private Button btnExtendMeeting;
     private final static String BROADCAST = "com.vivant.roomee.startRoomService";
     private final static String AUTOREFRESH = "com.vivant.roomee.services.autoRefresh";
+    private final static String dialogMessage = "Please wait ...";
+    private Thread timeThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +89,7 @@ public class RoomDetailsActivity extends Activity {
 
         //calculates and update the meeting and current time in every seconds
         Runnable myRunnableThread = new CountDownRunner();
-        Thread timeThread= new Thread(myRunnableThread);
+        timeThread= new Thread(myRunnableThread);
         timeThread.start();
     }
 
@@ -90,7 +99,7 @@ public class RoomDetailsActivity extends Activity {
     private void displayProgressDialog()
     {
         dialog = new ProgressDialog(RoomDetailsActivity.this);
-        this.dialog.setMessage(" Please wait ... ");
+        this.dialog.setMessage(dialogMessage);
         this.dialog.show();
         this.dialog.setCanceledOnTouchOutside(false);
         this.dialog.setCancelable(false);
@@ -127,7 +136,7 @@ public class RoomDetailsActivity extends Activity {
                     txtCurrentTime.setText(tc.getCurrentTime(null));
 
                     //calculate and update the meeting time
-                    if(room != null) {
+                    if(room.getTime() != null) {
                         String timeDiff = tc.calculateTimeDiff(room.getTime());
                         txtTime.setText(timeDiff);
                     }
@@ -239,13 +248,6 @@ public class RoomDetailsActivity extends Activity {
      */
     public void searchMeetingOnClick(View view)
     {
-//        if(!meetingDetailsDrawerLayout.isDrawerOpen(Gravity.LEFT))
-//        {
-//            Log.d("TEST", "open");
-//            meetingDetailsDrawerLayout.openDrawer(Gravity.LEFT);
-//            meetingDetailsLayout.setPadding(250,0,-250,0);
-//        }
-//        meetingDetailsLayout.setPadding(-250,0,250,0);
         meetingDetailsDrawerLayout.openDrawer(Gravity.LEFT);
     }
 
@@ -331,6 +333,17 @@ public class RoomDetailsActivity extends Activity {
     }
 
     /**
+     * this method manages the actions before the activity is destroyed
+     */
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        timeThread.interrupt();
+        stopService(new Intent(RoomDetailsActivity.this, RefreshRoomService.class));
+    }
+
+    /**
      * this class implements the BroadcastReceiver message that is send by the MyService
      */
     private BroadcastReceiver AutoRefreshReceiver = new BroadcastReceiver() {
@@ -346,6 +359,27 @@ public class RoomDetailsActivity extends Activity {
             //if receives auto refresh action request it will update the view automatically
             if(intent.getAction().equals(AUTOREFRESH))
             {
+                displayRefreshServiceMessage(intent);
+            }
+            //dismiss the loading dialog
+            if(dialog.isShowing()) dialog.dismiss();
+        }
+
+        /**
+         * this method displays the data send by the RefreshRoomService
+         * @param intent, Android Intent
+         */
+        private void displayRefreshServiceMessage(Intent intent)
+        {
+            String message = intent.getStringExtra("message");
+            if(!message.equals("success"))
+            {
+                if(done!= false)invalidMessage(message);
+                done = false;
+            }
+            else
+            {
+                done = true;
                 meetingList = intent.getParcelableArrayListExtra("meetingList");
                 room = (Room) intent.getSerializableExtra("room");
 
@@ -355,11 +389,28 @@ public class RoomDetailsActivity extends Activity {
 
                 //update meeting list for the searching meeting drawer
                 mlDrawer.addMeetingList(meetingList);
-
-                //dismiss the loading dialog
-                if(dialog.isShowing()) dialog.dismiss();
             }
         }
+
     };
+
+    /**
+     * this method displays invalid token message
+     * @param message, string message
+     */
+    private void invalidMessage(String message)
+    {
+        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setCancelable(true);
+        alertDialog.setCanceledOnTouchOutside(false);
+        alertDialog.setTitle("Error");
+        alertDialog.setMessage("\n"+message+"\n");
+        alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                done = true;
+            }
+        });
+        alertDialog.show();
+    }
 
 }

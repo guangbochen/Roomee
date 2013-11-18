@@ -17,7 +17,6 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import com.vivant.roomee.json.JSONParser;
 import com.vivant.roomee.json.JSONParserImpl;
@@ -51,7 +50,7 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
     private EditText txtDescription;
     private TimeCalculator tc;
     private Room room;
-    private ArrayList<Meeting> meetingList = new ArrayList<Meeting>();
+    private ArrayList<Meeting> meetingList;
     private JSONParser jsonParser;
     private DismissKeyboard dismissKeyboard;
     private Date date;
@@ -61,6 +60,7 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
     private static String description;
     private static String startTime;
     private static String endTime;
+
 
 
     /**
@@ -77,20 +77,17 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
         findContentView();
 
         //initialise instance
+        meetingList = new ArrayList<Meeting>();
         tc = new TimeCalculatorImpl();
         dismissKeyboard = new DismissKeyboard(this);
         dismissKeyboard.setupUI(addNewMeetingLinearLayout);
         setMeetingTimes();
-
-        //dummy data
-        txtSummary.setText("Android Meeting Catch up");
-        txtDescription.setText("description for the meeting");
         txtSummary.setOnFocusChangeListener(this);
         txtDescription.setOnFocusChangeListener(this);
 
         //set custom title for the action bar
         ActionBar ab = getActionBar();
-        ab.setTitle("New Meeting");
+        ab.setTitle(Constants.ADDNEWMEETINGTITLE);
         ab.setDisplayShowTitleEnabled(true);
 
         //retrieve data passed from RoomDetailsActivity
@@ -109,7 +106,7 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
      */
     private void setMeetingTimes()
     {
-        Date date = new Date();
+        date = new Date();
         btnStartTime.setText(tc.getCurrentTime(date));
         date.setHours(date.getHours()+1);
         btnEndTime.setText(tc.getCurrentTime(date));
@@ -143,14 +140,14 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
         //validate meeting summary input
         if(summary.length() == 0) {
             txtSummary.requestFocus();
-            invalidMessage("Meeting summary can't be empty");
+            invalidMessage(Constants.EMPTYSUMMARY);
             return false;
         }
 
         //validate meeting description input
         if(description.length() == 0) {
             txtDescription.requestFocus();
-            invalidMessage("Meeting description can't be empty");
+            invalidMessage(Constants.EMPTYDESC);
             return false;
         }
 
@@ -159,7 +156,7 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
         Date endDate = tc.parseStringToDate(endTime);
         if(endDate.compareTo(startDate) <= 0) {
             //validate meeting end time
-            invalidMessage("Invalid meeting end time ");
+            invalidMessage(Constants.INVALIDENDMEETING);
             return false;
         }
         else{
@@ -179,7 +176,7 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
      */
     private boolean validateMeetingTime(Date startDate, Date endDate) {
 
-        Date date = new Date();
+        date = new Date();
         //validate start meeting time
         if((startDate.getHours() < date.getHours()) ||
                 (startDate.getHours() == date.getHours() && startDate.getMinutes()<date.getMinutes()))
@@ -195,8 +192,7 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
             {
                 if(!tc.compareMeetingTime(startDate, endDate, m))
                 {
-                    String message = "Sorry, the room is already booked by another meeting of the selected time";
-                    invalidMessage(message);
+                    invalidMessage(Constants.BOOKEDROOM);
                     return false;
                 }
             }
@@ -219,6 +215,7 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
         btnEndTime = (Button) findViewById(R.id.btnEndTime);
         btnClearSummary = (ImageButton) findViewById(R.id.btn_clear_summary);
         btnClearDesc = (ImageButton) findViewById(R.id.btn_clear_desc);
+        addNewMeetingLinearLayout.requestFocus();
     }
 
     /**
@@ -284,9 +281,8 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
     {
         if(validateAddMeetingInput())
         {
-            String message = "Are you sure you want to submit?";
             new AlertDialog.Builder(this)
-                    .setMessage("\n"+message +"\n")
+                    .setMessage("\n"+ Constants.SUBMIT +"\n")
                     .setCancelable(false)
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
@@ -320,20 +316,20 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
         ((Button) view).setText(tc.getCurrentTime(date));
     }
 
+    /**
+     * this method manages onFocusChange action of the meeting
+     * @param view
+     * @param hasFocus
+     */
     @Override
     public void onFocusChange(View view, boolean hasFocus) {
-        if(view.getId() == txtSummary.getId() && hasFocus)
-        {
-            btnClearDesc.setVisibility(0);
-            if(txtSummary.getText().length()>0)
-                btnClearSummary.setVisibility(1);
 
-        }
-        else if(view.getId() == txtDescription.getId() && hasFocus) {
-            btnClearSummary.setVisibility(0);
-            if(txtDescription.getText().length()>0)
-                btnClearDesc.setVisibility(1);
-        }
+        btnClearDesc.setVisibility(View.INVISIBLE);
+        btnClearSummary.setVisibility(View.INVISIBLE);
+        if(view.getId() == txtSummary.getId() && hasFocus)
+            btnClearSummary.setVisibility(View.VISIBLE);
+        else if(view.getId() == txtDescription.getId() && hasFocus)
+            btnClearDesc.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -345,7 +341,6 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
         private ProgressDialog dialog;
         private Context context;
         private Boolean done;
-        private String message;
 
         /**
          * AddNewMeetingTask constructor
@@ -416,9 +411,8 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
 
             if(done == true)
             {
-                String message = "Thanks, you have created new meeting successfully.";
                 AlertDialog.Builder builder = new AlertDialog.Builder(AddMeetingActivity.this);
-                builder.setMessage("\n"+message +"\n")
+                builder.setMessage("\n"+ Constants.SUBMITSUCCESS +"\n")
                         .setCancelable(false)
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
@@ -430,8 +424,7 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
             }
             else
             {
-                message = "Submission failed, please try again";
-                invalidMessage(message);
+                invalidMessage(Constants.SUBMISIONFAILED);
             }
         }
     }

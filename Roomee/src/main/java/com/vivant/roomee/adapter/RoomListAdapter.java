@@ -47,7 +47,7 @@ public class RoomListAdapter extends BaseAdapter {
     }
 
     /**
-     * this method manages view components for each row in roomList
+     * this method returns a list of room views the RoomList Activity contains
      */
     @Override
     public View getView(int position, View view, ViewGroup parent) {

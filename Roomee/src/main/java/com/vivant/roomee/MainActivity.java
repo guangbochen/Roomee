@@ -14,15 +14,12 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-
 import com.vivant.roomee.json.JSONParser;
 import com.vivant.roomee.json.JSONParserImpl;
 import com.vivant.roomee.model.Constants;
 import com.vivant.roomee.util.DismissKeyboard;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 
 /**
  * this class manages user login activity
@@ -32,6 +29,7 @@ public class MainActivity extends Activity {
 
     private EditText txtAPIKey;
     private final static String title = "Welcome to Roomee";
+    private final static String EMPTYPASSWORD = "Password cannot be empty";
     private DismissKeyboard dismissKeyboard;
     private LinearLayout mainActivityLayout;
 
@@ -44,7 +42,9 @@ public class MainActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
 
+        //find all the view contents for the MainActivity
         findViewComponents();
+
         //manages dismiss key board action
         dismissKeyboard = new DismissKeyboard(this);
         dismissKeyboard.setupUI(mainActivityLayout);
@@ -66,7 +66,6 @@ public class MainActivity extends Activity {
         ab.setDisplayShowTitleEnabled(true);
     }
 
-
     /**
      * this method handles loginButton onclick event
      * it validate the API key through Roomee web service
@@ -77,8 +76,7 @@ public class MainActivity extends Activity {
             String apiKey = txtAPIKey.getText().toString();
             //if is empty displays error message
             if(apiKey.length() == 0) {
-                String message = "Password cannot be empty";
-                invalidMessage(message);
+                invalidMessage(EMPTYPASSWORD);
                 txtAPIKey.requestFocus();
             }
             else
@@ -203,8 +201,8 @@ public class MainActivity extends Activity {
 
     /**
      * this method creates the menu bar of the activity
-     * @param menu, Menu
-     * @return false, do not display the menu
+     * @param menu, Menu bar
+     * @return false, not displaying the menu bar
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

@@ -8,6 +8,7 @@
         android:id="@+id/meeting_details_layout"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
+        android:background="@color/white"
         android:orientation="vertical" >
         <!--this linearLayout contains header info(10%)-->
         <LinearLayout
@@ -62,14 +63,6 @@
                 android:textColor="@color/white"
                 android:textSize="30sp"
                 android:gravity="center" />
-            <!--<ImageButton-->
-                <!--android:id="@+id/imgButtonRefresh"-->
-                <!--android:layout_gravity="center"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_weight="50"-->
-                <!--android:layout_height="0dp"-->
-                <!--android:src="@drawable/ic_action_refresh"-->
-                <!--android:background="@null" />-->
         </LinearLayout>
 
         <!--this linearLayout contains the time details(70%)-->
@@ -85,22 +78,21 @@
                 android:id="@+id/txtStatus"
                 android:layout_width="match_parent"
                 android:layout_height="0sp"
-                android:layout_weight="12"
-                android:layout_margin="5sp"
+                android:layout_weight="20"
                 android:textColor="@color/white"
                 android:textSize="16sp"
-                android:gravity="center" />
+                android:gravity="bottom|center_horizontal" />
 
             <!--this textView shows room free or busy time-->
             <TextView
                 android:id="@+id/txtTime"
                 android:layout_width="match_parent"
                 android:layout_height="0sp"
-                android:layout_weight="60"
+                android:layout_weight="50"
                 android:layout_gravity="center_horizontal|top"
                 android:textColor="@color/white"
                 android:textSize="70sp"
-                android:gravity="center" />
+                android:gravity="center_horizontal" />
 
             <!--this linearLayout contians button for managing meeting actions-->
             <LinearLayout
@@ -108,8 +100,8 @@
                 android:layout_width="300dp"
                 android:layout_height="0sp"
                 android:orientation="horizontal"
-                android:layout_gravity="center"
-                android:layout_marginBottom="10sp"
+                android:layout_gravity="center_horizontal|top"
+                android:layout_marginBottom="15sp"
                 android:layout_marginRight="5sp"
                 android:layout_marginLeft="5sp"
                 android:layout_weight="25">
@@ -221,8 +213,8 @@
 
         <ListView android:id="@+id/meetingListDrawer"
             android:layout_width="320sp"
-            android:layout_height="match_parent"
-            android:choiceMode="singleChoice" />
+            android:clickable="false"
+            android:layout_height="match_parent" />
     </LinearLayout>
 
 </android.support.v4.widget.DrawerLayout>

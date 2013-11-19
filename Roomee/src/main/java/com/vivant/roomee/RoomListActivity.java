@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -158,6 +159,7 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
                 catch (Exception e)
                 {
                     e.printStackTrace();
+                    if(dialog.isShowing()) dialog.dismiss();
                 }
             }
         });
@@ -183,6 +185,26 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
     }
 
     /**
+     * this method respond to menu action buttons
+     * @param item, menu item
+     * @return true if button is clicked
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case R.id.action_refresh:
+                {
+                    displayProgressDialog();
+                    UpdateRoomList();
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    /**
      * this method display the activity menu bar
      * @param menu, menu bar
      * @return false, not showing the menu
@@ -191,6 +213,6 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.room_list, menu);
-        return false;
+        return true;
     }
 }

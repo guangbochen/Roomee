@@ -21,6 +21,7 @@
 
         <LinearLayout
             android:id="@+id/layoutSummary"
+            android:paddingTop="20sp"
             android:orientation="horizontal"
             android:layout_gravity="center"
             android:layout_height="wrap_content"

@@ -1,13 +1,9 @@
 package com.vivant.roomee.timeManager;
 
-import android.util.Log;
-
 import com.vivant.roomee.model.Meeting;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -144,18 +140,18 @@ public class TimeCalculatorImpl implements  TimeCalculator{
         {
             //get the existing start meeting time
             Date sMeeting = datetimeParser.parse(m.getStart());
-            Log.d("Test meeting Time", String.valueOf(sMeeting));
             //get the existing end meeting time
             Date eMeeting = datetimeParser.parse(m.getEnd());
 
             String pickedStartTime = getRFCDateFormat(startDate);
             String pickedEndTime = getRFCDateFormat(endDate);
-            Log.d("Test string sTime", pickedStartTime);
             startDate = datetimeParser.parse(pickedStartTime);
             endDate = datetimeParser.parse(pickedEndTime);
-            Log.d("Test sdate", String.valueOf(startDate));
 
-            //if the new meeting time is before or after the existing meeting time then return as validated
+            //if the new meeting time clashes with existing meeting
+            if(startDate.compareTo(sMeeting) > 0 && endDate.compareTo(eMeeting) < 0)
+                return false;
+            //if the new meeting time is before or after the existing meeting time then it is validated
             if(startDate.compareTo(eMeeting) > 0 || endDate.compareTo(eMeeting) < 0)
                 return true;
 
@@ -189,10 +185,8 @@ public class TimeCalculatorImpl implements  TimeCalculator{
         {
             e.printStackTrace();
         }
-
         return duration;
     }
-
 
     /**
      * this method calculates and returns the time difference between

@@ -13,6 +13,7 @@
     <!--string for action bar-->
     <string name="cancel">Cancel</string>
     <string name="submit">Submit</string>
+    <string name="refresh">Refresh</string>
 
 
     <color name="header_green">#38C27F</color>
@@ -28,7 +29,7 @@
     <color name="black">#000000</color>
     <color name="skyBlue">#60B2E6</color>
     <color name="darkGreen">#1D845C</color>
-    <color name="action_bar_bg">#A7A7A7</color>
+    <color name="action_bar_bg">#D8D8D8</color>
     <color name="transparent">#30FFFFFF</color>
     <color name="meeting_list_bg">#F0F0F0</color>
     <color name="drawer_title_bg">#405DA0</color>

@@ -5,18 +5,28 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.vivant.roomee.json.JSONParser;
 import com.vivant.roomee.json.JSONParserImpl;
+import com.vivant.roomee.json.Util;
 import com.vivant.roomee.model.Constants;
 import com.vivant.roomee.model.Meeting;
 import com.vivant.roomee.model.Room;
+import com.vivant.roomee.timeManager.TimeCalculator;
+import com.vivant.roomee.timeManager.TimeCalculatorImpl;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+
 
 /**
  * This is Android Service that manages to auto refresh the room and meeting data and send
@@ -31,9 +41,13 @@ public class RefreshRoomService extends Service {
     private Room room;
     private ArrayList<Meeting> meetingList;
     private JSONParser jsonParser;
-    private static String roomId;
+    private String deviceToken;
     private static String token;
     private Thread timeThread;
+    private TimeCalculator tc;
+    private Date date;
+
+
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -51,6 +65,7 @@ public class RefreshRoomService extends Service {
         mIntentFilter = new IntentFilter();
         mIntentFilter.addAction(BROADCAST);
         registerReceiver(mBroadcastReceiver,mIntentFilter);
+        tc = new TimeCalculatorImpl(); // used in process of checking if meetings today
     }
 
     /**
@@ -58,16 +73,10 @@ public class RefreshRoomService extends Service {
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if(intent.getExtras() != null)
-        {
-            roomId = intent.getStringExtra("roomId");
-            token = intent.getStringExtra("token");
-
-            //start the auto refresh counter
-            Runnable myRunnableThread = new AutoRefreshRoomdetails();
-            timeThread =  new Thread(myRunnableThread);
-            timeThread.start();
-        }
+//            //start the auto refresh counter
+        Runnable myRunnableThread = new AutoRefreshRoomdetails();
+        timeThread =  new Thread(myRunnableThread);
+        timeThread.start();
         return START_STICKY;
     }
 
@@ -80,6 +89,23 @@ public class RefreshRoomService extends Service {
         stopSelf();
         timeThread.interrupt();
         unregisterReceiver(mBroadcastReceiver);
+    }
+
+    public String getDevToken(){
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        deviceToken = preferences.getString("device_token", "device token not retrieved");
+        return deviceToken;
+
+//        SharedPreferences myPrefs = this.getSharedPreferences("roomee prefs", MODE_WORLD_READABLE);
+
+//
+//        Context context = getApplicationContext();
+//        SharedPreferences pref = context.getSharedPreferences("roomee_prefs", 0);
+//        String answer = pref.getString("device_token", "poop");
+//        if(answer!=null){
+//            deviceToken = answer;
+//        }
+//        return deviceToken;
     }
 
     /**
@@ -110,8 +136,8 @@ public class RefreshRoomService extends Service {
             String action = intent.getAction();
             if(action.equals(BROADCAST) && intent.getExtras() != null)
             {
-                roomId = intent.getStringExtra("roomId");
-                token = intent.getStringExtra("token");
+                deviceToken = intent.getStringExtra("device token");
+//                token = intent.getStringExtra("token");
                 new DownloadThread().execute();
             }
         }
@@ -136,9 +162,8 @@ public class RefreshRoomService extends Service {
             jsonParser = new JSONParserImpl();
             meetingList = new ArrayList<Meeting>();
             JSONObject json = new JSONObject();
-
             //getting json string from url
-            String url = "rooms/"+ roomId +"?oauth_token="+ token;
+            String url = "room/"+ "?device_token=" + deviceToken;
             json = jsonParser.getJSONFromUrl(url);
             try{
                 if(json != null)
@@ -165,8 +190,20 @@ public class RefreshRoomService extends Service {
                             String creator = jMeeting.getString(Constants.TAG_CREATOR);
                             String start = jMeeting.getString(Constants.TAG_START);
                             String end = jMeeting.getString(Constants.TAG_END);
+
+                              Date date = Util.parseRFC3339Date(start);
+                            Log.d("REFRESH PARSE", date.toString());
+//                            Date date = (new SimpleDateFormat(start));
+//                            Log.d("DATE CONVERSION", date.toString());
+//                            Stringmanager = new StringConvert();
+//                            String startDate = convertToString(iso, start);
+//                            Date startDate = parse3339(start);
+//                            Date startDate = tc.parseStringToDate(start);
+
+                            if(checkMeetingToday(date)){
                             Meeting meeting = new Meeting(summary, creator, start, end);
                             meetingList.add(meeting);
+                            }
                         }
                         message = HttpStatus;
                     }
@@ -176,6 +213,23 @@ public class RefreshRoomService extends Service {
                 e.printStackTrace();
             }
             return null;
+        }
+
+        private boolean checkMeetingToday(Date startTime){
+
+            date = new Date();
+            //validate start meeting time
+            if((startTime.getDate() < date.getDate() || startTime.getDate() > date.getDate()))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+                //converting regular meeting time to RFC3339 format
+//                startTime =  tc.getRFCDateFormat(startDate);
+//                endTime =  tc.getRFCDateFormat(endDate);
+            }
         }
 
         /**

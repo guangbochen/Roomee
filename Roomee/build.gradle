@@ -30,8 +30,9 @@ configurations {
 }
 
 dependencies {
-    compile files('libs/android-support-v4.jar')
+    compile 'com.android.support:appcompat-v7:+'
     compile files('libs/android-async-http-1.4.4.jar')
+    compile files('/libs/joda-convert-1.5/joda-convert-1.5.jar')
 }
 
 android.applicationVariants.all { variant ->

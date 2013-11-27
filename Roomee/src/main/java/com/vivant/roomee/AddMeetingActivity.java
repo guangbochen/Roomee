@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.DialogFragment;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -55,7 +56,7 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
     private DismissKeyboard dismissKeyboard;
     private Date date;
     //instances for add new meeting
-    private static String token;
+    private static String deviceToken;
     private static String summary;
     private static String description;
     private static String startTime;
@@ -95,7 +96,7 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
         if(extras != null)
         {
             //retrieve room and meeting data
-            token = extras.getString("token");
+            deviceToken = extras.getString("device token");
             room = (Room) extras.get("room");
             meetingList = extras.getParcelableArrayList("meetingList");
         }
@@ -372,17 +373,19 @@ public class AddMeetingActivity extends FragmentActivity implements TimePickerFr
             try{
                 //crate Json parser instance
                 jsonParser = new JSONParserImpl();
-                String url = "meetings";
+                String url = "meeting";
 
                 //set value to add new meeting data
                 List<NameValuePair> meetingData = new ArrayList<NameValuePair>(6);
-                meetingData.add(new BasicNameValuePair("oauth_token", token));
+                meetingData.add(new BasicNameValuePair("device_token", deviceToken));
                 meetingData.add(new BasicNameValuePair("id", String.valueOf(room.getId())));
                 meetingData.add(new BasicNameValuePair("summary", summary));
                 meetingData.add(new BasicNameValuePair("description", description));
                 meetingData.add(new BasicNameValuePair("startTime", startTime));
                 meetingData.add(new BasicNameValuePair("endTime", endTime));
 
+                String jsonError = meetingData.toString();
+                Log.d("JSON ERROR", jsonError);
                 //process add new meeting action
                 JSONObject json = jsonParser.postJSONToUrl(url, meetingData);
 

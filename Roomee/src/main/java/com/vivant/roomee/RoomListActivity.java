@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.app.Activity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.*;
 import com.vivant.roomee.adapter.RoomListAdapter;
 import com.vivant.roomee.json.RoomeeRestClient;
 import com.vivant.roomee.model.Constants;
@@ -29,6 +31,7 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
     private static boolean done;
     private List<Room> roomList;
     private String token;
+    private String uid;
     private ListView roomListView;
     private final static String title ="Meeting rooms";
     private final static String dialogMessage ="Loading rooms ...";
@@ -53,6 +56,7 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
             //calls async task to load list of rooms
+            uid = extras.getString("serial number"); //getting device serial number
             token = extras.getString("token");
             displayProgressDialog();
             UpdateRoomList();
@@ -128,6 +132,8 @@ public class RoomListActivity extends Activity implements OnItemClickListener {
     public void UpdateRoomList() {
         //initialise instance
         String url = "rooms?oauth_token=" +token;
+//         String url = "device/"+uid+"/activate";
+        Log.d("TESTING", token);
 
         RoomeeRestClient.get(url, null, new JsonHttpResponseHandler() {
             @Override

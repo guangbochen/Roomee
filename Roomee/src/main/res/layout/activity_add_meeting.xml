@@ -47,7 +47,8 @@
                     android:background="@drawable/edit_text_border"
                     android:paddingLeft="10sp"
                     android:hint="Summary"
-                    android:maxLines="1" />
+                    android:maxLines="1"
+                    android:inputType="textCapWords|textAutoCorrect" />
                 <ImageButton
                     android:id="@+id/btn_clear_summary"
                     android:onClick="emptyEditText"
@@ -74,7 +75,7 @@
                 android:gravity="center_vertical"
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
-                android:text="Meeting Description" />
+                android:text="Meeting Description"/>
 
             <FrameLayout
                 android:layout_weight="1"
@@ -88,14 +89,15 @@
                     android:gravity="top"
                     android:maxLength="50"
                     android:scrollbars="vertical"
-                    android:inputType="textMultiLine"
                     android:background="@drawable/edit_text_border"
                     android:hint="Description"
                     android:paddingRight="30sp"
                     android:paddingTop="10sp"
                     android:paddingLeft="10sp"
                     android:paddingBottom="10sp"
-                    android:maxLines="3"/>
+                    android:maxLines="3"
+                    android:inputType= "textMultiLine|textCapSentences|textAutoCorrect" />
+
                 <ImageButton
                     android:id="@+id/btn_clear_desc"
                     android:onClick="emptyEditText"

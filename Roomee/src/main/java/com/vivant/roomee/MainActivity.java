@@ -6,9 +6,12 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
+import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -74,16 +77,16 @@ public class MainActivity extends Activity {
     public void loginButtonOnClick(View view) {
         try
         {
-            String apiKey = txtAPIKey.getText().toString();
+            String accountCode = txtAPIKey.getText().toString();
             //if is empty displays error message
-            if(apiKey.length() == 0) {
+            if(accountCode.length() == 0) {
                 invalidMessage(EMPTYPASSWORD);
                 txtAPIKey.requestFocus();
             }
             else
             {
                 //validate the API key via roomee web service
-                new AuthenticationTask(MainActivity.this, apiKey).execute();
+                new AuthenticationTask(MainActivity.this, accountCode).execute();
             }
         }
         catch (Exception e)
@@ -104,7 +107,9 @@ public class MainActivity extends Activity {
         private Boolean done;
         private String message;
         private String token;
-        private String apiKey;
+        private String accountCode;
+        private String uid;
+        private int deviceRegistered = 0;
 
         /**
          * AuthenticationTask constructor
@@ -112,7 +117,14 @@ public class MainActivity extends Activity {
         public AuthenticationTask(Activity activity, String key) {
             context = activity;
             dialog = new ProgressDialog(context);
-            this.apiKey = key;
+            this.accountCode = key;
+        }
+
+        //* gets the device's serial number
+        public String getSerialNo(Context context){
+            TelephonyManager tManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+            uid = tManager.getDeviceId();
+            return uid;
         }
 
         /**
@@ -124,6 +136,11 @@ public class MainActivity extends Activity {
             this.dialog.setCanceledOnTouchOutside(false);
             this.dialog.setCancelable(true);
             this.dialog.show();
+            if(checkPrefs()){
+                done = true;
+                deviceRegistered = 1;
+                onPostExecute(Boolean.TRUE);
+            }
         }
 
         /**
@@ -133,13 +150,17 @@ public class MainActivity extends Activity {
          */
         @Override
         protected Boolean doInBackground(String... strings) {
-
+            if(checkPrefs()){
+                done = true;
+            }else{
             done = false;
+
             //crate Json parser instance
             JSONParser jsonParser = new JSONParserImpl();
             try{
                 //getting json data from url
-                String url = "auth?api_key=" + apiKey;
+                String url = "auth?account_code=" + accountCode;
+
                 JSONObject json = jsonParser.getJSONFromUrl(url);
                 if(json != null)
                 {
@@ -148,17 +169,46 @@ public class MainActivity extends Activity {
                     if(HttpStatus.equals("success"))
                     {
                         JSONObject data = json.getJSONObject(Constants.TAG_DATA);
-                        token = data.getString(Constants.TAG_OAUTH);
+                        token = data.getString(Constants.TAG_ACCESS_TOKEN);
+                        uid = getSerialNo(context);
+                        Log.d("SERIAL NUMBER", uid);
+                        SharedPreferences pref = context.getSharedPreferences("roomee_prefs", 0); // 0 - for private mode
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putString("access_token", token);
+                        Log.d("ACCESS TOKEN", token);
+                        editor.putString("account_code", accountCode);
+                        editor.commit();
                         done = true;
                     }
+
                     //invalid api key
-                    else message = json.getString(Constants.TAG_MESSAGE);
+                    // else message = json.getString(Constants.TAG_MESSAGE);
+                    else {
+                        JSONObject data = json.getJSONObject("data");
+                        message = data.getString("account_code");
+                    }
                 }
             }
             catch (JSONException e) {
                 e.printStackTrace();
             }
-            return null;
+            }
+                return null;
+
+        }
+
+        private boolean checkPrefs(){
+            Context context2 = getApplicationContext();
+            SharedPreferences pref = context2.getSharedPreferences("roomee_prefs", 0);
+            String answer = pref.getString("access_token", null);
+            if(answer!=null){
+                token = answer;
+                uid = pref.getString("device_token", null);
+                accountCode = pref.getString("account_code", null);
+                return true;
+            }else{
+                return false;
+            }
         }
 
         /**
@@ -175,11 +225,22 @@ public class MainActivity extends Activity {
             if(done == false)
             {
                 invalidMessage(message);
+            } else if(deviceRegistered == 1) {
+                //if is valid user login and calls roomList activity
+                Intent intent = new Intent(getApplicationContext(), RoomDetailsActivity.class);
+                //Intent intent = new Intent(getApplicationContext(), RoomDetailsActivity.class);
+                intent.putExtra("token", token);
+                intent.putExtra("serial number", uid);
+                intent.putExtra("account code", accountCode);
+                startActivity(intent);
             }
             else {
                 //if is valid user login and calls roomList activity
-                Intent intent = new Intent(getApplicationContext(), RoomListActivity.class);
+                Intent intent = new Intent(getApplicationContext(), DeviceActivation.class);
+                //Intent intent = new Intent(getApplicationContext(), RoomDetailsActivity.class);
                 intent.putExtra("token", token);
+                intent.putExtra("serial number", uid);
+                intent.putExtra("account code", accountCode);
                 startActivity(intent);
             }
         }

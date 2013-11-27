@@ -30,7 +30,7 @@ public class JSONParserImpl implements JSONParser {
     private static InputStream is = null;
     private static JSONObject jObj = null;
     private String json = "";
-    private final static String defaultUrl = "http://api.roomee.chrsptn.com/";
+    private final static String defaultUrl = "http://192.168.1.63/";
 
     /**
      * constructor to initialise variables
@@ -49,6 +49,9 @@ public class JSONParserImpl implements JSONParser {
         try {
             DefaultHttpClient httpClient = new DefaultHttpClient();
             String Url = defaultUrl + url;
+
+            Log.d("CALL", Url);
+
             HttpGet httpGet = new HttpGet(Url);
             HttpResponse httpResponse = httpClient.execute(httpGet);
             HttpEntity httpEntity = httpResponse.getEntity();
@@ -112,6 +115,7 @@ public class JSONParserImpl implements JSONParser {
             }
             is.close();
             json = sb.toString();
+            Log.d("JSON ERROR error error", json);
         }
         catch (Exception e) {
             Log.e("Buffer Error", "Error message " + e.toString());

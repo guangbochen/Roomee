@@ -7,51 +7,57 @@
     <uses-sdk
         android:minSdkVersion="7"
         android:targetSdkVersion="17" />
+
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppBaseTheme" >
-
         <activity
             android:name="com.vivant.roomee.MainActivity"
             android:label="@string/welcome"
-            android:screenOrientation="sensorLandscape">
+            android:screenOrientation="sensorLandscape" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!-- RoomList activity  -->
+        <!-- RoomList activity -->
         <activity
             android:name="com.vivant.roomee.RoomListActivity"
             android:configChanges="orientation|screenSize"
-            android:screenOrientation="sensorLandscape"
-            android:label="@string/title_activity_room_list" >
+            android:label="@string/title_activity_room_list"
+            android:screenOrientation="sensorLandscape" >
         </activity>
 
         <!-- defines roomDetails activity to take fullscreen -->
         <activity
             android:name="com.vivant.roomee.RoomDetailsActivity"
-            android:screenOrientation="sensorLandscape"
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_room_details"
-            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen">
+            android:screenOrientation="sensorLandscape"
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" >
         </activity>
 
-        <!--android:windowSoftInputMode="stateHidden"-->
+        <!-- android:windowSoftInputMode="stateHidden" -->
         <activity
-            android:name=".AddMeetingActivity"
-            android:theme="@style/AddNewMeetingTheme"
-            android:screenOrientation="sensorLandscape"
+            android:name="com.vivant.roomee.AddMeetingActivity"
             android:configChanges="orientation|screenSize"
-            android:label="New Meeting" />
+            android:label="New Meeting"
+            android:screenOrientation="sensorLandscape"
+            android:theme="@style/AddNewMeetingTheme" />
 
-        <service android:name=".services.RefreshRoomService"></service>
+        <service android:name="com.vivant.roomee.services.RefreshRoomService" />
 
+        <activity
+            android:name="com.vivant.roomee.DeviceActivation"
+            android:label="@string/title_activity_device_activation" >
+        </activity>
     </application>
 
 </manifest>

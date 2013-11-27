@@ -36,7 +36,7 @@
             android:maxLines="1"
             android:background="@drawable/edit_text_border"
             android:singleLine="true"
-            android:text="lrn6a1n3"/>
+            android:text="5732aad0"/>
 
         <Button
             android:id="@+id/btnLogin"

@@ -10,7 +10,8 @@ import com.loopj.android.http.RequestParams;
  */
 public class RoomeeRestClient {
 
-    private final static String BASE_URL = "http://api.roomee.chrsptn.com/";
+//    private final static String BASE_URL = "http://api.roomee.monkeyfun.dev/";
+    private final static String BASE_URL = "http://192.168.1.63:80/";
     private static AsyncHttpClient client = new AsyncHttpClient();
 
     /**
@@ -42,3 +43,4 @@ public class RoomeeRestClient {
         return BASE_URL + relativeUrl;
     }
 }
+

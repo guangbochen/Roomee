@@ -20,11 +20,12 @@ public class Constants {
     public final static String TAG_ROOM = "room";
     public final static String TAG_MEETINGS = "meetings";
     public final static String TAG_SUMMARY = "summary";
-    public final static String TAG_CREATOR = "creator";
+    public final static String TAG_CREATOR = "organiser";
     public final static String TAG_START = "start";
     public final static String TAG_END = "end";
     //JSON Node for Auth
     public static final String TAG_OAUTH = "oauth_token";
+    public static final String TAG_ACCESS_TOKEN = "access_token";
     //JSON Node for add new meeting
     public static final String TAG_MEETING = "meeting";
 

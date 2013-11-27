@@ -8,9 +8,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.app.Activity;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
@@ -27,6 +29,8 @@ import com.vivant.roomee.services.RefreshRoomService;
 import com.vivant.roomee.timeManager.TimeCalculator;
 import com.vivant.roomee.timeManager.TimeCalculatorImpl;
 import java.util.ArrayList;
+import android.preference.PreferenceManager;
+
 
 /**
  * this class manages displaying the RoomDetails activity and
@@ -34,7 +38,7 @@ import java.util.ArrayList;
  */
 public class RoomDetailsActivity extends Activity {
 
-    private static String roomId;
+    private static String deviceToken;
     private static String token;
     private static boolean done;
     private Room room;
@@ -67,7 +71,9 @@ public class RoomDetailsActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_room_details);
-
+        deviceToken = getDevToken();
+        Log.d("DEV TOKEN DETAILS ACTIVITY", deviceToken);
+        Log.d("Passed activation activity", "shared preferences stored");
         //find all of the view components in the RoomDetailsActivity
         findViewComponents();
 
@@ -75,22 +81,34 @@ public class RoomDetailsActivity extends Activity {
         tc = new TimeCalculatorImpl();
         mlDrawer = new MeetingListDrawerImpl(RoomDetailsActivity.this, meetingListDrawerLayout);
 
+
+//        Log.d("DEVICE TOKEN DETAILS", deviceToken);
+        displayProgressDialog();
+        startAutoRefreshServices(deviceToken);
+
         //retrieve data passed from RoomListActivity
-        Bundle extras = getIntent().getExtras();
-        if(extras != null)
-        {
-            roomId = extras.getString("id");
-            token = extras.getString("token");
+//        Bundle extras = getIntent().getExtras();
+//        if(extras != null)
+//        {
+//            deviceToken = extras.getString("device token");
+//            token = extras.getString("token");
 
             //start the RefreshRoomService to update the room details
-            displayProgressDialog();
-            startAutoRefreshServices(roomId, token);
-        }
+//            displayProgressDialog();
+//            startAutoRefreshServices(deviceToken, token);
+        //}
 
         //calculates and update the meeting and current time in every seconds
         Runnable myRunnableThread = new CountDownRunner();
         timeThread= new Thread(myRunnableThread);
         timeThread.start();
+    }
+
+    private String getDevToken(){
+        Context context = getApplicationContext();
+        SharedPreferences pref = context.getSharedPreferences("roomee_prefs", MODE_WORLD_READABLE);
+        deviceToken = pref.getString("device_token", null);
+        return deviceToken;
     }
 
     /**
@@ -236,7 +254,7 @@ public class RoomDetailsActivity extends Activity {
     public void addNewMeetingOnClick(View view)
     {
         Intent intent = new Intent(getApplicationContext(), AddMeetingActivity.class);
-        intent.putExtra("token", token);
+        intent.putExtra("device token", deviceToken);
         intent.putExtra("room", room);
         intent.putParcelableArrayListExtra("meetingList", meetingList);
         startActivity(intent);
@@ -260,24 +278,21 @@ public class RoomDetailsActivity extends Activity {
 
     /**
      * this method calls the RefreshRoomService and start the service
-     * @param roomId, String room id
-     * @param token, String authentication token
+     * @param deviceToken, String Device Token
      */
-    private void startAutoRefreshServices(String roomId, String token) {
+    private void startAutoRefreshServices(String deviceToken) {
         if(isMyServiceRunning() == true)
         {
             //start download file by sending broadcast intent to MyService
-            Intent i = new Intent();
-            i.putExtra("roomId", roomId);
-            i.putExtra("token", token);
-            i.setAction(BROADCAST);
-            sendBroadcast(i);
+                Intent i = new Intent();
+                i.putExtra("device token", deviceToken);
+                i.setAction(BROADCAST);
+                sendBroadcast(i);
         }
         else
         {
             Intent i = new Intent(RoomDetailsActivity.this, RefreshRoomService.class);
-            i.putExtra("roomId", roomId);
-            i.putExtra("token", token);
+            i.putExtra("device token", deviceToken);
             startService(i);
         }
     }
@@ -306,7 +321,7 @@ public class RoomDetailsActivity extends Activity {
     @Override
     public void onRestart() {
         super.onRestart();
-        startAutoRefreshServices(roomId, token);
+        startAutoRefreshServices(deviceToken);
     }
 
     /**
